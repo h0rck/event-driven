@@ -1,0 +1,36 @@
+{
+    "name": "user-service",
+    "version": "1.0.0",
+    "description": "User management microservice",
+    "main": "src/app.ts",
+    "scripts": {
+        "start": "ts-node src/app.ts",
+        "dev": "nodemon src/app.ts",
+        "build": "tsc",
+        "test": "jest"
+    },
+    "dependencies": {
+        "@fastify/cors": "^8.0.0",
+        "@fastify/jwt": "^7.0.0",
+        "@fastify/swagger": "^8.0.0",
+        "@types/amqplib": "^0.10.7",
+        "@types/joi": "^17.2.2",
+        "amqplib": "^0.10.5",
+        "bcrypt": "^5.1.0",
+        "dotenv": "^16.0.0",
+        "fastify": "^4.0.0",
+        "joi": "^17.13.3",
+        "mongoose": "^7.0.0",
+        "pino": "^8.0.0"
+    },
+    "devDependencies": {
+        "@types/bcrypt": "^5.0.0",
+        "@types/jest": "^29.0.0",
+        "@types/node": "^18.0.0",
+        "jest": "^29.0.0",
+        "nodemon": "^3.0.0",
+        "ts-jest": "^29.0.0",
+        "ts-node": "^10.0.0",
+        "typescript": "^5.0.0"
+    }
+}
