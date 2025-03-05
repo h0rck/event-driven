@@ -34,44 +34,36 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
-  node-app:
-    build: .
-    container_name: node-app
-    ports:
-      - "3000:3000"
-    environment:
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_USER=guest
-      - RABBITMQ_PASS=guest
-    depends_on:
-      - rabbitmq
-    networks:
-      - event-driven-net
-
+  # node-app:
+  #   build: .
+  #   container_name: node-app
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - RABBITMQ_HOST=rabbitmq
+  #     - RABBITMQ_USER=guest
+  #     - RABBITMQ_PASS=guest
+  #   depends_on:
+  #     - rabbitmq
+  #   networks:
+  #     - event-driven-net
   user-service:
-    image: node:18-alpine
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
     container_name: user-service
-    working_dir: /app
-    volumes:
-      - ./user-service:/app
-    command: >
-      sh -c "npm install &&
-             npm run build &&
-             npm start"
     ports:
       - "3000:3000"
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/user-service
       - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
-      - NODE_ENV=development
+      - NODE_ENV=production
     depends_on:
-      rabbitmq:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
+      - rabbitmq
+      - mongodb
     networks:
       - event-driven-net
+    restart: always
 
 volumes:
   rabbitmq_data:

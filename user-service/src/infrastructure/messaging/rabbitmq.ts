@@ -1,41 +1,72 @@
-import * as amqp from 'amqplib/callback_api';
-import { promisify } from 'util';
+import * as amqp from 'amqplib';
+import { connectWithRetry } from '../utils/connectionRetry';
+
+interface RabbitConnection {
+    createChannel(): Promise<amqp.Channel>;
+    on(event: 'error', listener: (err: Error) => void): this;
+    on(event: 'close', listener: () => void): this;
+    close(): Promise<void>;
+}
 
 export class RabbitMQClient {
-    private connection: any;
-    private channel: any;
+    private connection: RabbitConnection | null = null;
+    private channel: amqp.Channel | null = null;
 
     async connect(url: string = 'amqp://guest:guest@localhost:5672'): Promise<void> {
         try {
-            // Create a new Promise for connection
-            this.connection = await new Promise((resolve, reject) => {
-                amqp.connect(url, (err: Error, connection: any) => {
-                    if (err) reject(err);
-                    resolve(connection);
-                });
-            });
+            if (!this.connection) {
+                const conn = await connectWithRetry(
+                    async () => {
+                        const connection = await amqp.connect(url);
+                        return connection as unknown as RabbitConnection;
+                    },
+                    'RabbitMQ'
+                );
+                this.connection = conn;
 
-            // Create channel
-            this.channel = await new Promise((resolve, reject) => {
-                this.connection.createChannel((err: Error, channel: any) => {
-                    if (err) reject(err);
-                    resolve(channel);
-                });
-            });
-
-            // Setup exchange
-            await new Promise((resolve, reject) => {
-                this.channel.assertExchange('user-events', 'topic', { durable: true }, 
-                    (err: Error, ok: any) => {
-                        if (err) reject(err);
-                        resolve(ok);
+                this.connection.on('error', (error: Error) => {
+                    console.error('RabbitMQ connection error:', error);
+                    this.reconnect(url).catch(err => {
+                        console.error('Reconnection failed:', err);
                     });
-            });
+                });
 
-            console.log('Successfully connected to RabbitMQ');
+                this.connection.on('close', () => {
+                    console.error('RabbitMQ connection closed');
+                    this.reconnect(url).catch(err => {
+                        console.error('Reconnection failed:', err);
+                    });
+                });
+            }
+
+            if (!this.channel && this.connection) {
+                this.channel = await this.connection.createChannel();
+                await this.channel.assertExchange('user-events', 'topic', { 
+                    durable: true 
+                });
+                
+                console.log('Successfully connected to RabbitMQ');
+            }
         } catch (error) {
             console.error('Error connecting to RabbitMQ:', error);
             throw error;
+        }
+    }
+
+    private async reconnect(url: string): Promise<void> {
+        try {
+            if (this.channel) {
+                await this.channel.close();
+                this.channel = null;
+            }
+            if (this.connection) {
+                await this.connection.close();
+                this.connection = null;
+            }
+            await this.connect(url);
+        } catch (error) {
+            console.error('Failed to reconnect to RabbitMQ:', error);
+            setTimeout(() => this.reconnect(url), 5000);
         }
     }
 
@@ -46,7 +77,7 @@ export class RabbitMQClient {
 
         try {
             const message = Buffer.from(JSON.stringify(data));
-            this.channel.publish('user-events', routingKey, message, {
+            await this.channel.publish('user-events', routingKey, message, {
                 persistent: true,
                 contentType: 'application/json'
             });
@@ -59,20 +90,12 @@ export class RabbitMQClient {
     async close(): Promise<void> {
         try {
             if (this.channel) {
-                await new Promise((resolve, reject) => {
-                    this.channel.close((err: Error) => {
-                        if (err) reject(err);
-                        resolve(true);
-                    });
-                });
+                await this.channel.close();
+                this.channel = null;
             }
             if (this.connection) {
-                await new Promise((resolve, reject) => {
-                    this.connection.close((err: Error) => {
-                        if (err) reject(err);
-                        resolve(true);
-                    });
-                });
+                await this.connection.close();
+                this.connection = null;
             }
         } catch (error) {
             console.error('Error closing RabbitMQ connections:', error);
