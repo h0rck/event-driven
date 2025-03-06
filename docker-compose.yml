@@ -1,9 +1,32 @@
 version: '3.8'
 
 services:
+  traefik:
+    image: traefik:v2.9
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.file=true"
+      - "--providers.file.directory=/etc/traefik"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # Dashboard
+    volumes:
+      - ./ambiente/certs:/certs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./ambiente/traefik_dynamic.yml:/etc/traefik/dynamic.yml:ro
+    networks:
+      - event-driven-net
+    depends_on:
+      - user-service
+
   rabbitmq:
     image: rabbitmq:management
-    container_name: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -22,7 +45,6 @@ services:
 
   mongodb:
     image: mongo:latest
-    container_name: mongodb
     ports:
       - "27017:27017"
     volumes:
@@ -34,36 +56,24 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-  # node-app:
-  #   build: .
-  #   container_name: node-app
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - RABBITMQ_HOST=rabbitmq
-  #     - RABBITMQ_USER=guest
-  #     - RABBITMQ_PASS=guest
-  #   depends_on:
-  #     - rabbitmq
-  #   networks:
-  #     - event-driven-net
+
   user-service:
     build:
       context: ./user-service
       dockerfile: Dockerfile
-    container_name: user-service
-    ports:
-      - "3000:3000"
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/user-service
       - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
       - NODE_ENV=production
-    depends_on:
-      - rabbitmq
-      - mongodb
     networks:
       - event-driven-net
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.user-service.rule=Host(`user-service.dev.localhost`)"
+      - "traefik.http.routers.user-service.entrypoints=websecure"
+      - "traefik.http.routers.user-service.tls=true"
+      - "traefik.http.services.user-service.loadbalancer.server.port=3000"
 
 volumes:
   rabbitmq_data:
