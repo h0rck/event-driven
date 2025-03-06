@@ -1,13 +1,15 @@
 import { FastifyInstance } from 'fastify';
 import { UserController } from '../controllers/userController';
 import { User } from '../../domain/entities/User';
+import { ILoginDTO } from '../../domain/interfaces/ILoginDTO';
+import { authenticate } from '../middlewares/auth';
 
 interface IParams {
-  id: string;
+    id: string;
 }
 
-interface ICreateUserBody extends Omit<User, 'id' | 'createdAt' | 'updatedAt'> {}
-interface IUpdateUserBody extends Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>> {}
+interface ICreateUserBody extends Omit<User, 'id' | 'createdAt' | 'updatedAt'> { }
+interface IUpdateUserBody extends Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>> { }
 
 export async function userRoutes(fastify: FastifyInstance) {
     const userController = new UserController();
@@ -20,11 +22,11 @@ export async function userRoutes(fastify: FastifyInstance) {
 
     fastify.get<{
         Params: IParams
-    }>('/users/:id', async (request, reply) => {
+    }>('/users/:id', { preHandler: [authenticate] }, async (request, reply) => {
         return userController.getById(request, reply);
     });
 
-    fastify.get('/users', async (request, reply) => {
+    fastify.get('/users', { preHandler: [authenticate] }, async (request, reply) => {
         return userController.list(request, reply);
     });
 
@@ -39,5 +41,11 @@ export async function userRoutes(fastify: FastifyInstance) {
         Params: IParams
     }>('/users/:id', async (request, reply) => {
         return userController.delete(request, reply);
+    });
+
+    fastify.post<{
+        Body: ILoginDTO
+    }>('/login', async (request, reply) => {
+        return userController.login(request, reply);
     });
 }

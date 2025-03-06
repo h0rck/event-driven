@@ -3,6 +3,7 @@ import { UserRepository } from '../../domain/repositories/UserRepository';
 import { RabbitMQClient } from '../../infrastructure/messaging/rabbitmq';
 import { User } from '../../domain/entities/User';
 import bcrypt from 'bcrypt';
+import { ILoginDTO } from '../../domain/interfaces/ILoginDTO';
 
 export class UserController {
     private userRepository: UserRepository;
@@ -77,13 +78,13 @@ export class UserController {
         try {
             const { id } = request.params;
             const deleted = await this.userRepository.deleteUser(id);
-            
+
             if (deleted) {
                 // Publish user deleted event
                 await this.messagingClient.publishUserEvent('user.deleted', { id });
                 return reply.code(204).send();
             }
-            
+
             return reply.code(404).send({ error: 'User not found' });
         } catch (error) {
             return reply.code(500).send({ error: 'Internal Server Error' });
@@ -96,6 +97,39 @@ export class UserController {
             return reply.send(users);
         } catch (error) {
             return reply.code(500).send({ error: 'Internal Server Error' });
+        }
+    }
+
+    async login(request: FastifyRequest<{ Body: ILoginDTO }>, reply: FastifyReply) {
+        try {
+            const { email, password } = request.body;
+
+            const user = await this.userRepository.findByEmail(email);
+            if (!user || !user.id) {
+                return reply.status(401).send({ message: 'Invalid credentials' });
+            }
+
+            const isValidPassword = await bcrypt.compare(password, user.password);
+            if (!isValidPassword) {
+                return reply.status(401).send({ message: 'Invalid credentials' });
+            }
+
+            const token = await reply.jwtSign({
+                userId: user.id,
+                email: user.email
+            });
+
+            return reply.send({
+                token,
+                user: {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email
+                }
+            });
+        } catch (error) {
+            console.error('Login error:', error);
+            return reply.status(500).send({ message: 'Internal server error' });
         }
     }
 }
