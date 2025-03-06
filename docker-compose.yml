@@ -29,8 +29,8 @@ services:
   rabbitmq:
     image: rabbitmq:management
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5673:5672" # Changed from 5672:5672
+      - "15673:15672" # Changed from 15672:15672
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
@@ -64,7 +64,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/user-service
-      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
+      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5673 # Updated port
       - NODE_ENV=production
     networks:
       - event-driven-net
