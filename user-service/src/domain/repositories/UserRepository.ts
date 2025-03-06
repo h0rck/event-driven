@@ -1,5 +1,5 @@
-import { User } from "../entities/User.js";
-import { UserModel } from "../schemas/UserSchema.js";
+import { User } from "../entities/User";
+import { UserModel } from "../schemas/UserSchema";
 
 
 export class UserRepository {

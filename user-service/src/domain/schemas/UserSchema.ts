@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { User } from '../entities/User.js';
+import { User } from '../entities/User';
 
 const userSchema = new Schema<User>({
     name: { type: String, required: true },

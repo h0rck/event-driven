@@ -1,5 +1,5 @@
 import * as amqp from 'amqplib';
-import { connectWithRetry } from '../utils/connectionRetry.js';
+import { connectWithRetry } from '../utils/connectionRetry';
 
 interface RabbitConnection {
     createChannel(): Promise<amqp.Channel>;
@@ -12,7 +12,7 @@ export class RabbitMQClient {
     private connection: RabbitConnection | null = null;
     private channel: amqp.Channel | null = null;
 
-    async connect(url: string = 'amqp://guest:guest@localhost:5673'): Promise<void> {
+    async connect(url: string = 'amqp://guest:guest@localhost:5672'): Promise<void> {
         try {
             if (!this.connection) {
                 const conn = await connectWithRetry(

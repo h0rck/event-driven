@@ -5,10 +5,11 @@
     "main": "src/app.ts",
     "type": "module",
     "scripts": {
-        "start": "ts-node src/app.ts",
-        "dev": "nodemon src/app.ts",
+        "start": "node dist/app.js",
+        "dev": "ts-node src/app.ts",
         "build": "tsc",
-        "test": "jest"
+        "test": "jest",
+        "watch": "tsc -w"
     },
     "dependencies": {
         "@fastify/cors": "^8.0.0",

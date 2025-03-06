@@ -1,52 +1,64 @@
-import Fastify, { FastifyServerOptions } from 'fastify';
+import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { RabbitMQClient } from './infrastructure/messaging/rabbitmq.js';
-import { userRoutes } from './api/routes/userRoutes.js';
+import { RabbitMQClient } from './infrastructure/messaging/rabbitmq';
+import { userRoutes } from './api/routes/userRoutes';
 
-const fastify = Fastify({
-    logger: true
-} as FastifyServerOptions);
+async function buildApp(): Promise<FastifyInstance> {
+    const fastify = Fastify({
+        logger: true
+    });
 
-// Registrar o plugin JWT
-await fastify.register(jwt, {
-    secret: process.env.JWT_SECRET || 'your-secret-key'
-});
+    // Register JWT
+    await fastify.register(jwt, {
+        secret: process.env.JWT_SECRET || 'your-secret-key'
+    });
 
-// Registrar Swagger
-await fastify.register(swagger, {
-    openapi: {
-        info: {
-            title: 'User Service API',
-            description: 'User service documentation',
-            version: '1.0.0'
-        },
-        servers: [{
-            url: 'https://user-service.dev.localhost'
-        }],
-        components: {
-            securitySchemes: {
-                bearerAuth: {
-                    type: 'http',
-                    scheme: 'bearer',
-                    bearerFormat: 'JWT'
+    // Register Swagger
+    await fastify.register(swagger, {
+        openapi: {
+            info: {
+                title: 'User Service API',
+                description: 'User service documentation',
+                version: '1.0.0'
+            },
+            servers: [{
+                url: 'https://user-service.dev.localhost'
+            }],
+            components: {
+                securitySchemes: {
+                    bearerAuth: {
+                        type: 'http',
+                        scheme: 'bearer',
+                        bearerFormat: 'JWT'
+                    }
                 }
             }
         }
-    }
-});
+    });
 
-// Registrar Swagger UI
-await fastify.register(swaggerUi, {
-    routePrefix: '/documentation',
-    uiConfig: {
-        docExpansion: 'full',
-        deepLinking: false
-    },
-    staticCSP: true
-});
+    // Register Swagger UI
+    await fastify.register(swaggerUi, {
+        routePrefix: '/documentation',
+        uiConfig: {
+            docExpansion: 'full',
+            deepLinking: false
+        },
+        staticCSP: true
+    });
+
+    // Register CORS
+    await fastify.register(cors, {
+        origin: true
+    });
+
+    // Register Routes
+    await fastify.register(userRoutes);
+
+    return fastify;
+}
 
 // Declare module para TypeScript reconhecer o jwt
 declare module '@fastify/jwt' {
@@ -58,32 +70,28 @@ declare module '@fastify/jwt' {
     }
 }
 
+// Start the server
 async function start() {
     try {
+        const app = await buildApp();
         const messagingClient = new RabbitMQClient();
         await messagingClient.connect(process.env.RABBITMQ_URI);
 
-        await fastify.register(cors, {
-            origin: true
-        });
-
-        await fastify.register(userRoutes);
-
         process.on('SIGTERM', async () => {
             await messagingClient.close();
-            await fastify.close();
+            await app.close();
             process.exit(0);
         });
 
         const port = Number(process.env.PORT) || 3000;
-        await fastify.listen({
+        await app.listen({
             port,
             host: '0.0.0.0'
         });
 
         console.log(`Server is running on port ${port}`);
     } catch (err) {
-        fastify.log.error(err);
+        console.error(err);
         process.exit(1);
     }
 }

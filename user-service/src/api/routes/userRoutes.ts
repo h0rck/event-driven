@@ -1,8 +1,9 @@
-import { User } from '@/domain/entities/User.js';
+
 import { FastifyInstance } from 'fastify';
-import { UserController } from '../controllers/userController.js';
-import { authenticate } from '../middlewares/auth.js';
-import { ILoginDTO } from '@/domain/interfaces/ILoginDTO.js';
+import { UserController } from '../controllers/userController';
+import { authenticate } from '../middlewares/auth';
+import { User } from '../../domain/entities/User';
+import { ILoginDTO } from '../../domain/interfaces/ILoginDTO';
 
 interface IParams {
     id: string;
