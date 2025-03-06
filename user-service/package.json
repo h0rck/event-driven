@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "User management microservice",
     "main": "src/app.ts",
+    "type": "module",
     "scripts": {
         "start": "ts-node src/app.ts",
         "dev": "nodemon src/app.ts",
@@ -12,7 +13,8 @@
     "dependencies": {
         "@fastify/cors": "^8.0.0",
         "@fastify/jwt": "^7.0.0",
-        "@fastify/swagger": "^8.0.0",
+        "@fastify/swagger": "^8.15.0",
+        "@fastify/swagger-ui": "^5.2.2",
         "@types/amqplib": "^0.10.7",
         "@types/joi": "^17.2.2",
         "amqplib": "^0.10.5",

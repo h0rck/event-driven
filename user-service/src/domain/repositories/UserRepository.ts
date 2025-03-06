@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
-import { User } from '../entities/User';
-import { UserModel } from '../schemas/UserSchema';
+import { User } from "../entities/User.js";
+import { UserModel } from "../schemas/UserSchema.js";
+
 
 export class UserRepository {
     private users: User[] = [];

@@ -1,8 +1,8 @@
 import Fastify, { FastifyServerOptions } from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
-import { userRoutes } from './api/routes/userRoutes';
-import { RabbitMQClient } from './infrastructure/messaging/rabbitmq';
+import { RabbitMQClient } from './infrastructure/messaging/rabbitmq.js';
+import { userRoutes } from './api/routes/userRoutes.js';
 
 const fastify = Fastify({
     logger: true

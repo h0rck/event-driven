@@ -1,8 +1,8 @@
+import { User } from '@/domain/entities/User.js';
 import { FastifyInstance } from 'fastify';
-import { UserController } from '../controllers/userController';
-import { User } from '../../domain/entities/User';
-import { ILoginDTO } from '../../domain/interfaces/ILoginDTO';
-import { authenticate } from '../middlewares/auth';
+import { UserController } from '../controllers/userController.js';
+import { authenticate } from '../middlewares/auth.js';
+import { ILoginDTO } from '@/domain/interfaces/ILoginDTO.js';
 
 interface IParams {
     id: string;
@@ -16,30 +16,73 @@ export async function userRoutes(fastify: FastifyInstance) {
 
     fastify.post<{
         Body: ICreateUserBody
-    }>('/users', async (request, reply) => {
+    }>('/users', {
+        schema: {
+            description: 'Create a new user',
+            tags: ['users'],
+            body: {
+                type: 'object',
+                required: ['email', 'password', 'name'],
+                properties: {
+                    email: { type: 'string', format: 'email' },
+                    password: { type: 'string', minLength: 6 },
+                    name: { type: 'string' }
+                }
+            },
+            response: {
+                201: {
+                    description: 'Successful response',
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        email: { type: 'string' },
+                        name: { type: 'string' }
+                    }
+                }
+            }
+        }
+    }, async (request, reply) => {
         return userController.create(request, reply);
     });
 
     fastify.get<{
         Params: IParams
-    }>('/users/:id', { preHandler: [authenticate] }, async (request, reply) => {
+    }>('/users/:id', {
+        preHandler: [authenticate],
+        schema: {
+            security: [{ bearerAuth: [] }],
+        }
+    }, async (request, reply) => {
         return userController.getById(request, reply);
     });
 
-    fastify.get('/users', { preHandler: [authenticate] }, async (request, reply) => {
+    fastify.get('/users', {
+        preHandler: [authenticate],
+        schema: {
+            security: [{ bearerAuth: [] }],
+        }
+    }, async (request, reply) => {
         return userController.list(request, reply);
     });
 
     fastify.put<{
         Params: IParams,
         Body: IUpdateUserBody
-    }>('/users/:id', async (request, reply) => {
+    }>('/users/:id', {
+        schema: {
+            security: [{ bearerAuth: [] }],
+        }
+    }, async (request, reply) => {
         return userController.update(request, reply);
     });
 
     fastify.delete<{
         Params: IParams
-    }>('/users/:id', async (request, reply) => {
+    }>('/users/:id', {
+        schema: {
+            security: [{ bearerAuth: [] }],
+        }
+    }, async (request, reply) => {
         return userController.delete(request, reply);
     });
 
