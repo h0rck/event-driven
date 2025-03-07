@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2023"
+    ],
+    "module": "Node16",
+    "rootDir": "./src", // Diretório raiz do TypeScript
+    "outDir": "./dist", // Diretório de saída para JavaScript compilado
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*.ts" // Inclui apenas arquivos TypeScript dentro de `src`
+  ],
+  "exclude": [
+    "node_modules", // Exclui node_modules para evitar problemas de compilação
+    "dist" // Exclui dist para evitar recompilação dos arquivos gerados
+  ]
+}
