@@ -1,10 +1,10 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 
 import bcrypt from 'bcrypt';
-import { UserRepository } from '@/domain/repositories/UserRepository';
-import { RabbitMQClient } from '@/infrastructure/messaging/rabbitmq';
-import { User } from '@/domain/entities/User';
-import { ILoginDTO } from '@/domain/interfaces/ILoginDTO';
+import { UserRepository } from '../../domain/repositories/UserRepository';
+import { RabbitMQClient } from '../../infrastructure/messaging/rabbitmq';
+import { User } from '../../domain/entities/User';
+import { ILoginDTO } from '../../domain/interfaces/ILoginDTO';
 
 export class UserController {
     private userRepository: UserRepository;
