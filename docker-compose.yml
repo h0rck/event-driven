@@ -44,19 +44,18 @@ services:
       timeout: 10s
       retries: 3
 
-  mongodb:
-    image: mongo:latest
+  postgres:
+    image: postgres:15
+    container_name: postgres-container
+    restart: always
+    environment:
+      POSTGRES_DB: questoes
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
     ports:
-      - "27017:27017"
+      - "5432:5432"
     volumes:
-      - mongodb_data:/data/db
-    networks:
-      - event-driven-net
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      - ./postgres_data:/var/lib/postgresql/data
 
   user-service:
     build:
