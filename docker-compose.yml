@@ -49,7 +49,7 @@ services:
     container_name: postgres-container
     restart: always
     environment:
-      POSTGRES_DB: questoes
+      POSTGRES_DB: event-driven
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
     ports:
@@ -62,7 +62,7 @@ services:
       context: ./user-service
       dockerfile: Dockerfile
     environment:
-      - MONGODB_URI=mongodb://mongodb:27017/user-service
+      - DATABASE_URL=postgresql://admin:password@postgres:5432/event-driven
       - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
       - NODE_ENV=production
     networks:
@@ -77,10 +77,11 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      postgres:
+        condition: service_started
 
 volumes:
   rabbitmq_data:
-  mongodb_data:
 
 
 networks:

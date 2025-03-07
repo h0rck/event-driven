@@ -1,4 +1,5 @@
 
+import { PrismaClient } from "@prisma/client/extension";
 import { gerenciadorDeDependencias } from "./GerenciadorDeDependencias.service";
 
 const prismaClient = new PrismaClient();

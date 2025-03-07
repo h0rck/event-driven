@@ -1,6 +1,5 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors'
-import { questaoApi } from './routers/questao.api';
 import { usuarioApi } from './routers/usuario.api';
 import { registrarDependencias } from './config/RegistrarDependencias.config';
 
@@ -21,7 +20,6 @@ fastify.register(cors, {
 
 // fastify.register(fastifyMultipart);
 
-fastify.register(questaoApi, { prefix: '/api/v1' });
 fastify.register(usuarioApi, { prefix: '/api/v1' });
 
 
