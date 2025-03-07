@@ -69,9 +69,9 @@ services:
       context: ./user-service
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql://admin:password@postgres:5432/event-driven
-      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
-      - NODE_ENV=development
+      DATABASE_URL: postgresql://admin:password@postgres:5432/event-driven
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
+      NODE_ENV: development
     volumes:
       - ./user-service:/usr/src/app
       - /usr/src/app/node_modules
