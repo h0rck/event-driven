@@ -14,7 +14,6 @@
   "description": "",
   "dependencies": {
     "@fastify/cors": "^10.0.1",
-    "@prisma/client": "^6.4.1",
     "amqplib": "^0.10.5",
     "fastify": "^5.0.0"
   },

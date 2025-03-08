@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors'
-import { usuarioApi } from './routers/usuario.api';
+import { eventApi } from './routers/eventApi';
 import { registrarDependencias } from './config/RegistrarDependencias.config';
 
 const fastify = Fastify({
@@ -20,7 +20,7 @@ fastify.register(cors, {
 
 // fastify.register(fastifyMultipart);
 
-fastify.register(usuarioApi, { prefix: '/api/v1' });
+fastify.register(eventApi, { prefix: '/api/v1' });
 
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;

@@ -1,21 +1,13 @@
-import { PrismaClient } from "@prisma/client";
+
 import { gerenciadorDeDependencias } from "./GerenciadorDeDependencias.service";
-import { UsuarioRepository } from "../app/Repositories/UsuarioRepository";
 import { RabbitMQService } from "../app/Services/RabbitMQService";
-import { CreateUsuarioUseCase } from "../app/UseCases/Usuario/CreateUsuarioUseCase";
-
-
-
-const prismaClient = new PrismaClient();
+import { EventController } from "../app/Controllers/EventController";
 
 export function registrarDependencias() {
 
-    const usuarioRepository = new UsuarioRepository(prismaClient);
     const rabbitMQService = new RabbitMQService();
 
-    const createUsuarioUseCase = new CreateUsuarioUseCase(
-        usuarioRepository,
-        rabbitMQService
-    );
-    gerenciadorDeDependencias.registrar('CreateUsuarioUseCase', createUsuarioUseCase);
+    const eventController = new EventController(rabbitMQService);
+
+    gerenciadorDeDependencias.registrar('EventController', eventController);
 }
