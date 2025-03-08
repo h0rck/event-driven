@@ -73,8 +73,12 @@ services:
       RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
       NODE_ENV: development
     volumes:
-      - ./user-service:/usr/src/app
-      - /usr/src/app/node_modules
+      - type: bind
+        source: ./user-service
+        target: /usr/src/app
+      - type: volume
+        source: user_node_modules
+        target: /usr/src/app/node_modules
     networks:
       - event-driven-net
     restart: always
@@ -98,8 +102,12 @@ services:
       RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
       NODE_ENV: development
     volumes:
-      - ./email-service:/usr/src/app
-      - /usr/src/app/node_modules
+      - type: bind
+        source: ./email-service
+        target: /usr/src/app
+      - type: volume
+        source: email_node_modules
+        target: /usr/src/app/node_modules
     networks:
       - event-driven-net
     restart: always
@@ -115,6 +123,8 @@ services:
 
 volumes:
   rabbitmq_data:
+  user_node_modules:
+  email_node_modules:
 
 
 networks:
