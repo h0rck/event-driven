@@ -1,25 +1,39 @@
-import { io } from 'socket.io-client';
+// Exemplo para o servidor (backend)
+import { Server } from 'socket.io';
 
-const socket = io('http://localhost:3001');
-
-socket.on('connect', () => {
-    console.log('Connected to WebSocket');
+const io = new Server(3001, {
+    cors: {
+        origin: '*', // Pode configurar isso para um domínio específico
+    },
 });
 
-socket.on('queues', (queues) => {
-    console.log('Received queues:', queues);
+// Evento de conexão
+io.on('connection', (socket) => {
+    console.log('A client connected', socket.id);
+
+    // Enviar a lista de filas (simulação)
+    socket.emit('queues', ['queue1', 'queue2', 'queue3']);
+
+    // Evento para solicitar informações de uma fila
+    socket.on('getQueueInfo', (queueName) => {
+        console.log(`Requesting info for ${queueName}`);
+        // Simulação de dados
+        socket.emit('queueInfo', { queueName, info: 'Detalhes da fila' });
+    });
+
+    // Evento para se inscrever em uma fila
+    socket.on('subscribeToQueue', (queueName) => {
+        console.log(`Subscribed to ${queueName}`);
+        socket.join(queueName); // Se inscreve na "sala" da fila
+    });
+
+    // Emissor de mensagens para a fila
+    socket.on('queueMessage', (message) => {
+        console.log('Message received:', message);
+        socket.emit('queueMessage', { message });
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
 });
-
-socket.on('queueInfo', (queueInfo) => {
-    console.log('Received queue info:', queueInfo);
-});
-
-socket.on('queueMessage', (message) => {
-    console.log('Received message:', message);
-});
-
-// Para solicitar informações de uma fila específica
-socket.emit('getQueueInfo', 'nome-da-fila');
-
-// Para se inscrever em uma fila específica
-socket.emit('subscribeToQueue', 'nome-da-fila');

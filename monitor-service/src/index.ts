@@ -1,19 +1,51 @@
-import { createServer, IncomingMessage, ServerResponse } from 'http';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import { RabbitMQService } from './services/rabbitmq.service';
 
-const port = process.env.PORT || 3000;
-
-const server = createServer((req: IncomingMessage, res: ServerResponse) => {
+const port = process.env.PORT || 3002;
+const httpServer = createServer((req, res) => {
     if (req.url === '/health' && req.method === 'GET') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'ok' }));
         return;
     }
-
     res.writeHead(404);
     res.end();
 });
 
-server.listen(port, () => {
+const io = new Server(httpServer, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    }
+});
+
+const rabbitMQ = new RabbitMQService();
+
+io.on('connection', async (socket) => {
+    console.log('Client connected:', socket.id);
+
+    // Send initial queues list
+    const queues = await rabbitMQ.getQueues();
+    socket.emit('queues', queues);
+
+    socket.on('getQueueInfo', async (queueName: string) => {
+        const queueInfo = await rabbitMQ.getQueueInfo(queueName);
+        socket.emit('queueInfo', queueInfo);
+    });
+
+    socket.on('subscribeToQueue', (queueName: string) => {
+        rabbitMQ.subscribeToQueue(queueName, (message) => {
+            socket.emit('queueMessage', message);
+        });
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+});
+
+httpServer.listen(port, () => {
     console.log(`Monitor service listening on port ${port}`);
 });
 

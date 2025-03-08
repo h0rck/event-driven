@@ -105,10 +105,39 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  monitor-service:
+    build:
+      context: ./monitor-service
+      dockerfile: Dockerfile
+    environment:
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
+      NODE_ENV: development
+      PORT: 3002
+    volumes:
+      - type: bind
+        source: ./monitor-service
+        target: /usr/src/app
+      - type: volume
+        source: monitor_node_modules
+        target: /usr/src/app/node_modules
+    networks:
+      - event-driven-net
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.monitor-service.rule=Host(`monitor-service.dev.localhost`)"
+      - "traefik.http.routers.monitor-service.entrypoints=websecure"
+      - "traefik.http.routers.monitor-service.tls=true"
+      - "traefik.http.services.monitor-service.loadbalancer.server.port=3002"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
 volumes:
   rabbitmq_data:
   user_node_modules:
   email_node_modules:
+  monitor_node_modules:
 
 
 networks:
