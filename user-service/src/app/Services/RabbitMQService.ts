@@ -56,6 +56,7 @@ export class RabbitMQService implements IMessageBroker {
             return;
         }
 
+
         if (!this.channel) {
             throw new Error('Canal RabbitMQ não inicializado');
         }

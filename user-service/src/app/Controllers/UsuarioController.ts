@@ -4,18 +4,35 @@ import { z } from 'zod';
 import { prisma } from '../../lib/prisma';
 import { BcryptService } from '../Services/BcryptService';
 import { ICreateUsuarioUseCase } from '../UseCases/Usuario/CreateUsuarioUseCase';
-import { IMessageBroker } from '../Interfaces/IMessageBroker';
 import { EmailNotification } from '../Interfaces/Events';
+import { RabbitMQService } from '../Services/RabbitMQService';
 
 export class UsuarioController {
 
     constructor(
         private createUsuarioUseCase: ICreateUsuarioUseCase,
-        private messageBroker: IMessageBroker
     ) { }
 
     async index(request: FastifyRequest, reply: FastifyReply) {
-        return reply.status(200).send({ date: 'index' });
+        try {
+            const usuarios = await prisma.usuario.findMany({
+                select: {
+                    id: true,
+                    nome: true,
+                    email: true,
+                    usuario: true,
+                }
+            });
+
+            return reply.status(200).send({
+                message: 'Usuários listados com sucesso',
+                data: usuarios
+            });
+        } catch (error) {
+            return reply.status(500).send({
+                message: 'Erro ao listar usuários'
+            });
+        }
     }
 
     async show(request: FastifyRequest, reply: FastifyReply) {
@@ -144,39 +161,38 @@ export class UsuarioController {
             });
         }
 
-        try {
-            const { email } = result.data;
 
-            const usuario = await prisma.usuario.findFirst({
-                where: { email }
-            });
+        const { email } = result.data;
 
-            if (!usuario) {
-                return reply.status(404).send({
-                    message: 'Usuário não encontrado'
-                });
-            }
+        const usuario = await prisma.usuario.findFirst({
+            where: { email }
+        });
 
-            const emailNotification: EmailNotification = {
-                to: usuario.email,
-                subject: 'Confirme seu e-mail',
-                template: 'confirm-email',
-                data: {
-                    nome: usuario.nome,
-                    usuario: usuario.usuario
-                }
-            };
-
-            await this.messageBroker.publishMessage('user.events', 'user.email.confirmation', emailNotification);
-
-            return reply.status(200).send({
-                message: `E-mail de confirmação reenviado para ${email}`
-            });
-        } catch (error) {
-            return reply.status(500).send({
-                message: 'Erro ao reenviar e-mail de confirmação'
+        if (!usuario) {
+            return reply.status(404).send({
+                message: 'Usuário não encontrado'
             });
         }
+
+        const emailNotification: EmailNotification = {
+            to: usuario.email,
+            subject: 'Confirme seu e-mail',
+            template: 'confirm-email',
+            data: {
+                nome: usuario.nome,
+                usuario: usuario.usuario
+            }
+        };
+
+        const messageBroker = new RabbitMQService();
+        await messageBroker.initialize();
+
+        await messageBroker.publishMessage('user.events', 'user.email.confirmation', emailNotification);
+
+        return reply.status(200).send({
+            message: `E-mail de confirmação reenviado para ${email}`
+        });
+
     }
 
     async resendResetPasswordEmail(request: FastifyRequest, reply: FastifyReply) {
