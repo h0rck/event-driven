@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Permissão de execução: chmod +x setup-certs.sh
+# Permissão de execução: chmod +x setup-traefik.sh
 
 # Criar diretório para certificados
 mkdir -p ./ambiente/certs
