@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "lib": [
+      "ES2023"
+    ],
+    "module": "commonjs",
+    "rootDir": "./src", // Diretório raiz do TypeScript
+    "outDir": "./dist", // Diretório de saída para JavaScript compilado
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": false,
+    "skipLibCheck": true,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "baseUrl": "./",
+    "incremental": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false
+  },
+  "include": [
+    "src/**/*.ts" // Inclui apenas arquivos TypeScript dentro de `src`
+  ],
+  "exclude": [
+    "node_modules", // Exclui node_modules para evitar problemas de compilação
+    "dist" // Exclui dist para evitar recompilação dos arquivos gerados
+  ]
+}

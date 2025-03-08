@@ -39,6 +39,26 @@ export class RabbitMQService implements IMessageBroker {
                 // Assegura a existência do exchange
                 await this.channel.assertExchange('user.events', 'direct', { durable: true });
 
+                // Configurar exchanges e filas
+                const configs = [
+                    { exchange: 'events.email', queue: 'email_queue' },
+                    { exchange: 'events.payments', queue: 'payment_queue' },
+                    { exchange: 'events.inventory', queue: 'inventory_queue' }
+                ];
+
+                for (const config of configs) {
+                    // Criar exchange
+                    await this.channel.assertExchange(config.exchange, 'topic', { durable: true });
+
+                    // Criar fila
+                    await this.channel.assertQueue(config.queue, { durable: true });
+
+                    // Criar binding entre exchange e fila
+                    await this.channel.bindQueue(config.queue, config.exchange, '#');
+
+                    console.log(`Setup completo para ${config.exchange} -> ${config.queue}`);
+                }
+
                 console.log('Conexão com RabbitMQ estabelecida');
             } else {
                 throw new Error('Falha na conexão com RabbitMQ');
@@ -56,7 +76,6 @@ export class RabbitMQService implements IMessageBroker {
             return;
         }
 
-
         if (!this.channel) {
             throw new Error('Canal RabbitMQ não inicializado');
         }
@@ -67,6 +86,7 @@ export class RabbitMQService implements IMessageBroker {
 
             // Publicando a mensagem no RabbitMQ
             this.channel.publish(exchange, routingKey, payload, { persistent: true });
+            console.log(`Mensagem publicada no RabbitMQ: ${exchange} - ${routingKey}`);
         } catch (error) {
             console.error('Erro ao publicar a mensagem:', error);
             throw error;
