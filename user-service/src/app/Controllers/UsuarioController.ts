@@ -3,15 +3,16 @@ import { JwtService } from '../Services/JwtService';
 import { z } from 'zod';
 import { prisma } from '../../lib/prisma';
 import { BcryptService } from '../Services/BcryptService';
-import { CreateUsuarioUseCase, ICreateUsuarioUseCase } from '../UseCases/Usuario/CreateUsuarioUseCase';
+import { ICreateUsuarioUseCase } from '../UseCases/Usuario/CreateUsuarioUseCase';
+import { IMessageBroker } from '../Interfaces/IMessageBroker';
+import { EmailNotification } from '../Interfaces/Events';
 
 export class UsuarioController {
 
     constructor(
-        private createUsuarioUseCase: ICreateUsuarioUseCase
-    ) {
-
-    }
+        private createUsuarioUseCase: ICreateUsuarioUseCase,
+        private messageBroker: IMessageBroker
+    ) { }
 
     async index(request: FastifyRequest, reply: FastifyReply) {
         return reply.status(200).send({ date: 'index' });
@@ -41,26 +42,22 @@ export class UsuarioController {
             });
         }
 
-        try {
-            const { nome, email, usuario, senha } = result.data;
+
+        const { nome, email, usuario, senha } = result.data;
 
 
-            const novoUsuario = await this.createUsuarioUseCase.execute({ nome, email, usuario, senha }, true);
+        const novoUsuario = await this.createUsuarioUseCase.execute({ nome, email, usuario, senha }, true);
 
-            return reply.status(201).send({
-                message: 'Usuário criado com sucesso',
-                data: {
-                    id: novoUsuario.id,
-                    nome: novoUsuario.nome,
-                    email: novoUsuario.email,
-                    usuario: novoUsuario.usuario
-                }
-            });
-        } catch (error) {
-            return reply.status(500).send({
-                message: 'Erro interno do servidor'
-            });
-        }
+        return reply.status(201).send({
+            message: 'Usuário criado com sucesso',
+            data: {
+                id: novoUsuario.id,
+                nome: novoUsuario.nome,
+                email: novoUsuario.email,
+                usuario: novoUsuario.usuario
+            }
+        });
+
     }
 
     async update(request: FastifyRequest, reply: FastifyReply) {
@@ -147,13 +144,39 @@ export class UsuarioController {
             });
         }
 
-        const { email } = result.data;
-        // Aqui você chamaria seu serviço de e-mail para reenviar a confirmação
-        // await EmailService.enviarEmailConfirmacao(email);
+        try {
+            const { email } = result.data;
 
-        return reply.status(200).send({
-            message: `E-mail de confirmação reenviado para ${email}`
-        });
+            const usuario = await prisma.usuario.findFirst({
+                where: { email }
+            });
+
+            if (!usuario) {
+                return reply.status(404).send({
+                    message: 'Usuário não encontrado'
+                });
+            }
+
+            const emailNotification: EmailNotification = {
+                to: usuario.email,
+                subject: 'Confirme seu e-mail',
+                template: 'confirm-email',
+                data: {
+                    nome: usuario.nome,
+                    usuario: usuario.usuario
+                }
+            };
+
+            await this.messageBroker.publishMessage('user.events', 'user.email.confirmation', emailNotification);
+
+            return reply.status(200).send({
+                message: `E-mail de confirmação reenviado para ${email}`
+            });
+        } catch (error) {
+            return reply.status(500).send({
+                message: 'Erro ao reenviar e-mail de confirmação'
+            });
+        }
     }
 
     async resendResetPasswordEmail(request: FastifyRequest, reply: FastifyReply) {

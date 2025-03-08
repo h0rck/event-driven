@@ -24,10 +24,12 @@ export class RabbitMQService implements IMessageBroker {
             const rabbitUri = process.env.RABBITMQ_URI || 'amqp://guest:guest@rabbitmq:5672';
 
             // Conectando ao RabbitMQ
+            // @ts-ignore
             this.connection = await amqp.connect(rabbitUri);
 
             if (this.connection) {
                 // Criando um canal de comunicação com o RabbitMQ
+                // @ts-ignore
                 this.channel = await this.connection.createChannel();
 
                 if (!this.channel) {
@@ -83,6 +85,7 @@ export class RabbitMQService implements IMessageBroker {
             }
 
             if (this.connection) {
+                // @ts-ignore
                 await this.connection.close(); // Fechando a conexão
             }
         } catch (error) {
