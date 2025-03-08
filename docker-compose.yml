@@ -24,7 +24,7 @@ services:
     networks:
       - event-driven-net
     depends_on:
-      - user-service
+      - event-service
 
   rabbitmq:
     image: rabbitmq:management
@@ -64,9 +64,9 @@ services:
       timeout: 5s
       retries: 5
 
-  user-service:
+  event-service:
     build:
-      context: ./user-service
+      context: ./event-service
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql://admin:password@postgres:5432/event-driven
@@ -74,7 +74,7 @@ services:
       NODE_ENV: development
     volumes:
       - type: bind
-        source: ./user-service
+        source: ./event-service
         target: /usr/src/app
       - type: volume
         source: user_node_modules
@@ -84,10 +84,10 @@ services:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.user-service.rule=Host(`user-service.dev.localhost`)"
-      - "traefik.http.routers.user-service.entrypoints=websecure"
-      - "traefik.http.routers.user-service.tls=true"
-      - "traefik.http.services.user-service.loadbalancer.server.port=3000"
+      - "traefik.http.routers.event-service.rule=Host(`event-service.dev.localhost`)"
+      - "traefik.http.routers.event-service.entrypoints=websecure"
+      - "traefik.http.routers.event-service.tls=true"
+      - "traefik.http.services.event-service.loadbalancer.server.port=3000"
     depends_on:
       rabbitmq:
         condition: service_healthy
