@@ -3,8 +3,15 @@ import { JwtService } from '../Services/JwtService';
 import { z } from 'zod';
 import { prisma } from '../../lib/prisma';
 import { BcryptService } from '../Services/BcryptService';
+import { CreateUsuarioUseCase, ICreateUsuarioUseCase } from '../UseCases/Usuario/CreateUsuarioUseCase';
 
 export class UsuarioController {
+
+    constructor(
+        private createUsuarioUseCase: ICreateUsuarioUseCase
+    ) {
+
+    }
 
     async index(request: FastifyRequest, reply: FastifyReply) {
         return reply.status(200).send({ date: 'index' });
@@ -15,41 +22,30 @@ export class UsuarioController {
     }
 
     async store(request: FastifyRequest, reply: FastifyReply) {
+        const usuarioSchema = z.object({
+            nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
+            email: z.string().email('Email inválido'),
+            usuario: z.string().min(3, 'Usuário deve ter no mínimo 3 caracteres'),
+            senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres')
+        });
+
+        const result = usuarioSchema.safeParse(request.body);
+
+        if (!result.success) {
+            return reply.status(400).send({
+                message: 'Dados inválidos',
+                errors: result.error.errors.map(error => ({
+                    field: error.path.join('.'),
+                    message: error.message
+                }))
+            });
+        }
+
         try {
-            const usuarioSchema = z.object({
-                nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
-                email: z.string().email('Email inválido'),
-                usuario: z.string().min(3, 'Usuário deve ter no mínimo 3 caracteres'),
-                senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres')
-            });
+            const { nome, email, usuario, senha } = result.data;
 
-            const usuario = usuarioSchema.parse(request.body);
 
-            const existingUser = await prisma.usuario.findFirst({
-                where: {
-                    OR: [
-                        { email: usuario.email },
-                        { usuario: usuario.usuario }
-                    ]
-                }
-            });
-
-            if (existingUser) {
-                return reply.status(400).send({
-                    message: 'Email ou nome de usuário já cadastrado'
-                });
-            }
-
-            const senha = await BcryptService.hash(usuario.senha);
-
-            const novoUsuario = await prisma.usuario.create({
-                data: {
-                    nome: usuario.nome,
-                    email: usuario.email,
-                    usuario: usuario.usuario,
-                    senha: senha
-                }
-            });
+            const novoUsuario = await this.createUsuarioUseCase.execute({ nome, email, usuario, senha }, true);
 
             return reply.status(201).send({
                 message: 'Usuário criado com sucesso',
@@ -61,12 +57,6 @@ export class UsuarioController {
                 }
             });
         } catch (error) {
-            if (error instanceof z.ZodError) {
-                return reply.status(400).send({
-                    message: 'Dados inválidos',
-                    errors: error.errors
-                });
-            }
             return reply.status(500).send({
                 message: 'Erro interno do servidor'
             });
@@ -142,5 +132,49 @@ export class UsuarioController {
                 message: 'Erro interno do servidor'
             });
         }
+    }
+
+    async resendConfirmationEmail(request: FastifyRequest, reply: FastifyReply) {
+        const emailSchema = z.object({
+            email: z.string().email('E-mail inválido')
+        });
+
+        const result = emailSchema.safeParse(request.body);
+        if (!result.success) {
+            return reply.status(400).send({
+                message: 'Dados inválidos',
+                errors: result.error.errors
+            });
+        }
+
+        const { email } = result.data;
+        // Aqui você chamaria seu serviço de e-mail para reenviar a confirmação
+        // await EmailService.enviarEmailConfirmacao(email);
+
+        return reply.status(200).send({
+            message: `E-mail de confirmação reenviado para ${email}`
+        });
+    }
+
+    async resendResetPasswordEmail(request: FastifyRequest, reply: FastifyReply) {
+        const emailSchema = z.object({
+            email: z.string().email('E-mail inválido')
+        });
+
+        const result = emailSchema.safeParse(request.body);
+        if (!result.success) {
+            return reply.status(400).send({
+                message: 'Dados inválidos',
+                errors: result.error.errors
+            });
+        }
+
+        const { email } = result.data;
+        // Aqui você chamaria seu serviço de e-mail para reenviar o link de redefinição de senha
+        // await EmailService.enviarEmailRedefinicaoSenha(email);
+
+        return reply.status(200).send({
+            message: `E-mail de redefinição de senha reenviado para ${email}`
+        });
     }
 }

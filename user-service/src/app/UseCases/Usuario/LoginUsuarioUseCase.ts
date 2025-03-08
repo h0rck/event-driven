@@ -1,4 +1,5 @@
-import { IUsuarioRepository } from '../../Repositories/UsuarioRepository';
+
+import { IUsuarioRepository } from '../../Interfaces/IUsuarioRepository';
 import { BcryptService } from '../../Services/BcryptService';
 import { JwtService } from '../../Services/JwtService';
 

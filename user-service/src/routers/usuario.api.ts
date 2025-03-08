@@ -1,18 +1,18 @@
 import { FastifyInstance } from "fastify";
+import { gerenciadorDeDependencias } from "../config/GerenciadorDeDependencias.service";
 import { UsuarioController } from "../app/Controllers/UsuarioController";
+import { ICreateUsuarioUseCase } from "../app/UseCases/Usuario/CreateUsuarioUseCase";
 
 export async function usuarioApi(app: FastifyInstance) {
 
-    app.post('/login', (request, reply) => new UsuarioController().login(request, reply));
+    const createUsuarioUseCase = gerenciadorDeDependencias.obter('CreateUsuarioUseCase') as ICreateUsuarioUseCase;
 
-    app.get('/usuario', (request, reply) => new UsuarioController().index(request, reply));
+    const usuarioController = new UsuarioController(createUsuarioUseCase);
 
-    app.get('/usuario/:id', (request, reply) => new UsuarioController().show(request, reply));
-
-    app.post('/usuario', (request, reply) => new UsuarioController().store(request, reply));
-
-    app.put('/usuario/:id', (request, reply) => new UsuarioController().update(request, reply));
-
-    app.delete('/usuario/:id', (request, reply) => new UsuarioController().destroy(request, reply));
-
+    app.post('/login', (request, reply) => usuarioController.login(request, reply));
+    app.get('/usuario', (request, reply) => usuarioController.index(request, reply));
+    app.get('/usuario/:id', (request, reply) => usuarioController.show(request, reply));
+    app.post('/usuario', (request, reply) => usuarioController.store(request, reply));
+    app.put('/usuario/:id', (request, reply) => usuarioController.update(request, reply));
+    app.delete('/usuario/:id', (request, reply) => usuarioController.destroy(request, reply));
 }

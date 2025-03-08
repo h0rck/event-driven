@@ -1,55 +1,55 @@
-import amqp, { Channel, Connection } from 'amqplib';
+import amqp, { Connection, Channel } from 'amqplib';
+import { IMessageBroker } from '../Interfaces/IMessageBroker';
 
-export class RabbitMQService {
-    private static connection: Connection;
-    private static channel: Channel;
-    private static isTestEnvironment: boolean = process.env.NODE_ENV === 'test';
-    private static messageLog: Array<{ exchange: string; routingKey: string; message: any }> = [];
+export class RabbitMQService implements IMessageBroker {
+    private connection?: Connection;
+    private channel?: Channel;
+    private isTestEnvironment: boolean;
+    private messageLog: Array<{ exchange: string; routingKey: string; message: any }>;
 
-    static async initialize(): Promise<void> {
+    constructor() {
+        this.isTestEnvironment = process.env.NODE_ENV === 'test';
+        this.messageLog = [];
+    }
+
+    async initialize(): Promise<void> {
         if (this.isTestEnvironment) {
             this.messageLog = [];
             return;
         }
 
         try {
-            this.connection = await amqp.connect(process.env.RABBITMQ_URI || 'amqp://guest:guest@rabbitmq:5672');
+            const rabbitUri = process.env.RABBITMQ_URI || 'amqp://guest:guest@rabbitmq:5672';
+            this.connection = await amqp.connect(rabbitUri);
             this.channel = await this.connection.createChannel();
-
-            // Declarar as exchanges
             await this.channel.assertExchange('user.events', 'direct', { durable: true });
-
-            console.log('RabbitMQ conectado com sucesso');
+            console.log('RabbitMQ connection established');
         } catch (error) {
-            console.error('Erro ao conectar ao RabbitMQ:', error);
+            console.error('Error connecting to RabbitMQ:', error);
             throw error;
         }
     }
 
-    static async publishMessage(exchange: string, routingKey: string, message: any): Promise<void> {
+    async publishMessage(exchange: string, routingKey: string, message: any): Promise<void> {
         if (this.isTestEnvironment) {
             this.messageLog.push({ exchange, routingKey, message });
             return;
         }
 
-        try {
-            if (!this.channel) {
-                throw new Error('Canal RabbitMQ não inicializado');
-            }
+        if (!this.channel) {
+            throw new Error('RabbitMQ channel not initialized');
+        }
 
-            await this.channel.publish(
-                exchange,
-                routingKey,
-                Buffer.from(JSON.stringify(message)),
-                { persistent: true }
-            );
+        try {
+            const payload = Buffer.from(JSON.stringify(message));
+            this.channel.publish(exchange, routingKey, payload, { persistent: true });
         } catch (error) {
-            console.error('Erro ao publicar mensagem:', error);
+            console.error('Error publishing message:', error);
             throw error;
         }
     }
 
-    static async closeConnection(): Promise<void> {
+    async closeConnection(): Promise<void> {
         if (this.isTestEnvironment) {
             this.messageLog = [];
             return;
@@ -59,16 +59,16 @@ export class RabbitMQService {
             await this.channel?.close();
             await this.connection?.close();
         } catch (error) {
-            console.error('Erro ao fechar conexão com RabbitMQ:', error);
+            console.error('Error closing RabbitMQ connection:', error);
         }
     }
 
-    // Métodos auxiliares para testes
-    static getPublishedMessages() {
+    // Test helpers
+    getPublishedMessages() {
         return this.messageLog;
     }
 
-    static clearMessages() {
+    clearMessages() {
         this.messageLog = [];
     }
 }

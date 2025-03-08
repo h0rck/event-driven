@@ -1,8 +1,6 @@
 import { CreateUsuarioUseCase } from '../CreateUsuarioUseCase';
 import { UsuarioRepositoryMock } from '../../../Repositories/__mocks__/UsuarioRepositoryMock';
 
-// Remova jest.mock
-// jest.mock('../../../Services/RabbitMQService');
 
 interface RabbitMessage {
     exchange: string;
@@ -12,7 +10,6 @@ interface RabbitMessage {
 
 const messages: RabbitMessage[] = [];
 
-// Defina o service como constante pois será importado no CreateUsuarioUseCase
 const RabbitMQService = {
     initialize: jest.fn().mockResolvedValue(undefined),
 
@@ -30,7 +27,6 @@ const RabbitMQService = {
     })
 };
 
-// Mock manual para o módulo
 jest.mock('../../../Services/RabbitMQService', () => ({
     RabbitMQService
 }));

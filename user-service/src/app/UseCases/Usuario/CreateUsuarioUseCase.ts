@@ -1,23 +1,30 @@
 import { Usuario } from '@prisma/client';
-import { IUsuarioRepository } from '../../Repositories/UsuarioRepository';
 import { BcryptService } from '../../Services/BcryptService';
-import { RabbitMQService } from '../../Services/RabbitMQService';
 import { UserCreatedEvent, EmailNotification } from '../../Interfaces/Events';
+import { IMessageBroker } from '../../Interfaces/IMessageBroker';
+import { IUsuarioRepository } from '../../Interfaces/IUsuarioRepository';
 
 interface ICreateUsuarioDTO {
     nome: string;
     email: string;
     usuario: string;
     senha: string;
-    sendWelcomeEmail?: boolean;
 }
 
-export class CreateUsuarioUseCase {
+export interface ICreateUsuarioUseCase {
+    execute(data: ICreateUsuarioDTO, sendWelcomeEmail?: boolean): Promise<Usuario>;
+}
 
-    constructor(private usuarioRepository: IUsuarioRepository) { }
+export class CreateUsuarioUseCase implements ICreateUsuarioUseCase {
+
+    constructor(
+        private usuarioRepository: IUsuarioRepository,
+        private messagBroker: IMessageBroker
+
+    ) { }
 
 
-    async execute(data: ICreateUsuarioDTO): Promise<Usuario> {
+    async execute(data: ICreateUsuarioDTO, sendWelcomeEmail = false): Promise<Usuario> {
         const existingUser = await this.usuarioRepository.findByEmail(data.email);
         if (existingUser) {
             throw new Error('Email já cadastrado');
@@ -35,7 +42,7 @@ export class CreateUsuarioUseCase {
             senha
         });
 
-        // Sempre publica o evento de usuário criado
+
         const userCreatedEvent: UserCreatedEvent = {
             id: novoUsuario.id,
             email: novoUsuario.email,
@@ -44,10 +51,10 @@ export class CreateUsuarioUseCase {
             createdAt: novoUsuario.createdAt
         };
 
-        await RabbitMQService.publishMessage('user.events', 'user.created', userCreatedEvent);
+        await this.messagBroker.publishMessage('user.events', 'user.created', userCreatedEvent);
 
-        // Só envia email se sendWelcomeEmail for true
-        if (data.sendWelcomeEmail !== false) {
+
+        if (sendWelcomeEmail) {
             const emailNotification: EmailNotification = {
                 to: novoUsuario.email,
                 subject: 'Bem-vindo ao nosso serviço!',
@@ -58,11 +65,8 @@ export class CreateUsuarioUseCase {
                 }
             };
 
-            await RabbitMQService.publishMessage('user.events', 'user.email.welcome', emailNotification);
+            await this.messagBroker.publishMessage('user.events', 'user.email.welcome', emailNotification);
         }
-
-        console.log('RabbitMQService methods:', Object.keys(RabbitMQService));
-        console.log('Messages after operation:', RabbitMQService.getPublishedMessages());
 
         return novoUsuario;
     }
