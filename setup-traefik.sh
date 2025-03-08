@@ -19,7 +19,8 @@ chmod +x mkcert
     "*.dev.localhost" \
     "event-service.dev.localhost" \
     "email-service.dev.localhost" \
-    "rabbitmq.dev.localhost"
+    "rabbitmq.dev.localhost" \
+    "monitor-service.dev.localhost"
 
 echo "✅ Certificados gerados com sucesso!"
 ls -l local-cert.pem local-key.pem
