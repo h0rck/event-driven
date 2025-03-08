@@ -133,11 +133,38 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  monitor-frontend:
+    build:
+      context: ./monitor-frontend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: https://monitor-service.dev.localhost
+    volumes:
+      - type: bind
+        source: ./monitor-frontend
+        target: /usr/src/app
+      - type: volume
+        source: monitor_frontend_node_modules
+        target: /usr/src/app/node_modules
+    networks:
+      - event-driven-net
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.monitor-frontend.rule=Host(`monitor.dev.localhost`)"
+      - "traefik.http.routers.monitor-frontend.entrypoints=websecure"
+      - "traefik.http.routers.monitor-frontend.tls=true"
+      - "traefik.http.services.monitor-frontend.loadbalancer.server.port=5173"
+    depends_on:
+      - monitor-service
+
 volumes:
   rabbitmq_data:
   user_node_modules:
   email_node_modules:
   monitor_node_modules:
+  monitor_frontend_node_modules:
 
 
 networks:
