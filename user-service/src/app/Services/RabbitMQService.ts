@@ -83,12 +83,15 @@ export class RabbitMQService implements IMessageBroker {
         try {
             if (this.channel) {
                 await this.channel.close(); // Fechando o canal
+
             }
 
             if (this.connection) {
                 // @ts-ignore
                 await this.connection.close(); // Fechando a conexão
             }
+
+            console.log('Canal RabbitMQ fechado');
         } catch (error) {
             console.error('Erro ao fechar a conexão RabbitMQ:', error);
         }

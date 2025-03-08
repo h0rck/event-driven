@@ -188,7 +188,7 @@ export class UsuarioController {
         await messageBroker.initialize();
 
         await messageBroker.publishMessage('user.events', 'user.email.confirmation', emailNotification);
-
+        await messageBroker.closeConnection();
         return reply.status(200).send({
             message: `E-mail de confirmação reenviado para ${email}`
         });
