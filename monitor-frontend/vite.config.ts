@@ -5,6 +5,10 @@ export default defineConfig({
     plugins: [react()],
     server: {
         port: 5173,
-        strictPort: true // Isso fará com que o Vite falhe se a porta 5173 não estiver disponível, ao invés de tentar outra porta
+        strictPort: true,
+        host: true, // Needed for Docker
+        watch: {
+            usePolling: true
+        }
     }
 })

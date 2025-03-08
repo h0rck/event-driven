@@ -15,9 +15,15 @@ const httpServer = createServer((req, res) => {
 
 const io = new Server(httpServer, {
     cors: {
-        origin: '*',
-        methods: ['GET', 'POST']
-    }
+        origin: [
+            'https://monitor.dev.localhost',
+            'http://localhost:5173'
+        ],
+        methods: ['GET', 'POST'],
+        credentials: true
+    },
+    transports: ['websocket'],
+    path: '/socket.io'
 });
 
 const rabbitMQ = new RabbitMQService();

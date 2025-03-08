@@ -12,7 +12,7 @@ export class RabbitMQService {
   private async initialize() {
     try {
       // @ts-ignore
-      this.connection = await amqp.connect(process.env.RABBITMQ_URI || 'amqp://localhost:5672');
+      this.connection = await amqp.connect(process.env.RABBITMQ_URI || 'amqp://guest:guest@rabbitmq:5672');
       // @ts-ignore
       this.channel = await this.connection.createChannel();
       console.log('Connected to RabbitMQ');
@@ -23,7 +23,7 @@ export class RabbitMQService {
 
   async getQueues(): Promise<QueueInfo[]> {
     try {
-      const response = await fetch('http://localhost:15672/api/queues', {
+      const response = await fetch('http://rabbitmq:15672/api/queues', {
         headers: {
           Authorization: 'Basic ' + Buffer.from('guest:guest').toString('base64'),
         },
@@ -38,7 +38,7 @@ export class RabbitMQService {
 
   async getQueueInfo(queueName: string): Promise<QueueInfo | null> {
     try {
-      const response = await fetch(`http://localhost:15672/api/queues/%2F/${queueName}`, {
+      const response = await fetch(`http://rabbitmq:15672/api/queues/%2F/${queueName}`, {
         headers: {
           Authorization: 'Basic ' + Buffer.from('guest:guest').toString('base64'),
         },
