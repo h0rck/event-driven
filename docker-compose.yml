@@ -50,32 +50,11 @@ services:
       - "traefik.http.routers.rabbitmq.tls=true"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
-  postgres:
-    image: postgres:15
-    container_name: postgres-container
-    restart: always
-    environment:
-      POSTGRES_DB: event-driven
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./postgres_data:/var/lib/postgresql/data
-    networks:
-      - event-driven-net
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d event-driven" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   event-service:
     build:
       context: ./event-service
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://admin:password@postgres:5432/event-driven
       RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
       NODE_ENV: development
     volumes:
@@ -97,8 +76,6 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      postgres:
-        condition: service_started
 
   email-service:
     build:
