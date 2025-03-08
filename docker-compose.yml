@@ -101,6 +101,7 @@ services:
     environment:
       RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
       NODE_ENV: development
+      PORT: 3001
     volumes:
       - type: bind
         source: ./email-service
