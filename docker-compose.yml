@@ -90,6 +90,29 @@ services:
       postgres:
         condition: service_started
 
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: Dockerfile
+    environment:
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
+      NODE_ENV: development
+    volumes:
+      - ./email-service:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - event-driven-net
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.email-service.rule=Host(`email-service.dev.localhost`)"
+      - "traefik.http.routers.email-service.entrypoints=websecure"
+      - "traefik.http.routers.email-service.tls=true"
+      - "traefik.http.services.email-service.loadbalancer.server.port=3001"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
 volumes:
   rabbitmq_data:
 
