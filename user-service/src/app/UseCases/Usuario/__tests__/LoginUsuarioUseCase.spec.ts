@@ -1,6 +1,6 @@
 import { LoginUsuarioUseCase } from '../LoginUsuarioUseCase';
-import { UsuarioRepositoryMock } from '../../../Repositories/mocks/UsuarioRepositoryMock';
 import { BcryptService } from '../../../Services/BcryptService';
+import { UsuarioRepositoryMock } from '../../../Repositories/__mocks__/UsuarioRepositoryMock';
 
 describe('LoginUsuarioUseCase', () => {
     let usuarioRepository: UsuarioRepositoryMock;

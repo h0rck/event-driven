@@ -9,10 +9,13 @@ interface ICreateUsuarioDTO {
     email: string;
     usuario: string;
     senha: string;
+    sendWelcomeEmail?: boolean;
 }
 
 export class CreateUsuarioUseCase {
+
     constructor(private usuarioRepository: IUsuarioRepository) { }
+
 
     async execute(data: ICreateUsuarioDTO): Promise<Usuario> {
         const existingUser = await this.usuarioRepository.findByEmail(data.email);
@@ -32,7 +35,7 @@ export class CreateUsuarioUseCase {
             senha
         });
 
-        // Enviar evento de usuário criado
+        // Sempre publica o evento de usuário criado
         const userCreatedEvent: UserCreatedEvent = {
             id: novoUsuario.id,
             email: novoUsuario.email,
@@ -41,24 +44,25 @@ export class CreateUsuarioUseCase {
             createdAt: novoUsuario.createdAt
         };
 
-        // Enviar notificação de email
-        const emailNotification: EmailNotification = {
-            to: novoUsuario.email,
-            subject: 'Bem-vindo ao nosso serviço!',
-            template: 'welcome-email',
-            data: {
-                nome: novoUsuario.nome,
-                usuario: novoUsuario.usuario
-            }
-        };
+        await RabbitMQService.publishMessage('user.events', 'user.created', userCreatedEvent);
 
-        try {
-            await RabbitMQService.publishMessage('user.events', 'user.created', userCreatedEvent);
+        // Só envia email se sendWelcomeEmail for true
+        if (data.sendWelcomeEmail !== false) {
+            const emailNotification: EmailNotification = {
+                to: novoUsuario.email,
+                subject: 'Bem-vindo ao nosso serviço!',
+                template: 'welcome-email',
+                data: {
+                    nome: novoUsuario.nome,
+                    usuario: novoUsuario.usuario
+                }
+            };
+
             await RabbitMQService.publishMessage('user.events', 'user.email.welcome', emailNotification);
-        } catch (error) {
-            console.error('Erro ao enviar eventos:', error);
-            // Não vamos lançar o erro para não impedir a criação do usuário
         }
+
+        console.log('RabbitMQService methods:', Object.keys(RabbitMQService));
+        console.log('Messages after operation:', RabbitMQService.getPublishedMessages());
 
         return novoUsuario;
     }

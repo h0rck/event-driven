@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { JwtService } from './JwtService';
+import { JwtService } from '../JwtService';
 
 // Mock do jsonwebtoken
 jest.mock('jsonwebtoken', () => ({
