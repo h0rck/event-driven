@@ -3,10 +3,12 @@ import { io, Socket } from 'socket.io-client';
 let socket: Socket;
 
 export const connectSocket = () => {
-    socket = io('http://monitor-service.dev.localhost', {
+    socket = io('https://monitor-service.dev.localhost', {
         transports: ['polling', 'websocket'], // Permite fallback para polling (HTTP)
         path: '/socket.io',
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        secure: true,
+        withCredentials: true
     });
 
 

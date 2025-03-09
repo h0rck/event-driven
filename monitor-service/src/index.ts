@@ -15,9 +15,14 @@ const httpServer = createServer((req, res) => {
 
 const io = new Server(httpServer, {
     cors: {
-        origin: '*', // Apenas para testes, depois restrinja
-        methods: ['GET', 'POST'],
-        credentials: true
+        origin: [
+            "https://monitor.dev.localhost",
+            "http://monitor.dev.localhost",
+            "http://localhost:5173"
+        ],
+        methods: ['GET', 'POST', 'OPTIONS'],
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization']
     },
     transports: ['polling', 'websocket'],
     path: '/socket.io'
