@@ -5,41 +5,49 @@
 
 ### 📊 Diagrama da Arquitetura
 ```mermaid
-graph TD
-    Client[Client Browser] --> |HTTPS| Traefik[Traefik Proxy]
-    
-    Traefik --> |/api/v1/events/*| EventService[Event Service]
-    Traefik --> |/socket.io| MonitorService[Monitor Service]
-    Traefik --> |/* static| Frontend[Monitor Frontend]
-    Traefik --> |/api| RabbitMQMgmt[RabbitMQ Management]
-    
-    EventService --> |Publish Events| RabbitMQ[RabbitMQ]
-    MonitorService --> |Monitor Queues| RabbitMQ
-    EmailService[Email Service] --> |Consume Events| RabbitMQ
-    
-    subgraph Services
-        EventService
-        MonitorService
-        EmailService
-    end
-    
-    subgraph Message Broker
-        RabbitMQ
-    end
-    
-    subgraph Frontend Layer
-        Frontend --> |WebSocket| MonitorService
+flowchart TB
+    subgraph Client Layer
+        Browser([Browser])
     end
 
-    classDef container fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef proxy fill:#fff3e0,stroke:#ff6f00,stroke-width:2px;
-    classDef client fill:#f1f8e9,stroke:#33691e,stroke-width:2px;
-    classDef broker fill:#fce4ec,stroke:#880e4f,stroke-width:2px;
+    subgraph Gateway Layer
+        Traefik[Traefik Proxy]
+    end
+
+    subgraph Frontend Layer
+        Frontend[React App]
+    end
+
+    subgraph Services Layer
+        EventService[Event Service]
+        MonitorService[Monitor Service]
+        EmailService[Email Service]
+    end
+
+    subgraph Message Layer
+        RabbitMQ[(RabbitMQ)]
+    end
+
+    %% Connections
+    Browser --> |HTTPS| Traefik
+    Traefik --> |/| Frontend
+    Traefik --> |/api/events| EventService
+    Traefik --> |/socket.io| MonitorService
+    Frontend --> |WebSocket| MonitorService
+    EventService --> |Publish| RabbitMQ
+    MonitorService --> |Subscribe| RabbitMQ
+    EmailService --> |Consume| RabbitMQ
+
+    %% Styling
+    classDef client fill:#d4edda,stroke:#155724
+    classDef gateway fill:#cce5ff,stroke:#004085
+    classDef service fill:#fff3cd,stroke:#856404
+    classDef broker fill:#f8d7da,stroke:#721c24
     
-    class Client client;
-    class Traefik proxy;
-    class RabbitMQ,RabbitMQMgmt broker;
-    class EventService,MonitorService,EmailService,Frontend container;
+    class Browser client
+    class Traefik gateway
+    class EventService,MonitorService,EmailService service
+    class RabbitMQ broker
 ```
 
 ## 📋 Stack Tecnológica
