@@ -1,4 +1,4 @@
-# 🚀 Evnt Diven Achitecture
+# 🚀 Event Driven Architecture
 
 ### Monitor Frontend
 ![Monitor Frontend](./assets/images/monitor-frontend.png)
