@@ -3,6 +3,44 @@
 ### Monitor Frontend
 ![Monitor Frontend](./assets/images/monitor-frontend.png)
 
+### 📊 Diagrama da Arquitetura
+```mermaid
+graph TD
+    Client[Client Browser] --> |HTTPS| Traefik[Traefik Proxy]
+    
+    Traefik --> |/api/v1/events/*| EventService[Event Service]
+    Traefik --> |/socket.io| MonitorService[Monitor Service]
+    Traefik --> |/* static| Frontend[Monitor Frontend]
+    Traefik --> |/api| RabbitMQMgmt[RabbitMQ Management]
+    
+    EventService --> |Publish Events| RabbitMQ[RabbitMQ]
+    MonitorService --> |Monitor Queues| RabbitMQ
+    EmailService[Email Service] --> |Consume Events| RabbitMQ
+    
+    subgraph Services
+        EventService
+        MonitorService
+        EmailService
+    end
+    
+    subgraph Message Broker
+        RabbitMQ
+    end
+    
+    subgraph Frontend Layer
+        Frontend --> |WebSocket| MonitorService
+    end
+
+    classDef container fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef proxy fill:#fff3e0,stroke:#ff6f00,stroke-width:2px;
+    classDef client fill:#f1f8e9,stroke:#33691e,stroke-width:2px;
+    classDef broker fill:#fce4ec,stroke:#880e4f,stroke-width:2px;
+    
+    class Client client;
+    class Traefik proxy;
+    class RabbitMQ,RabbitMQMgmt broker;
+    class EventService,MonitorService,EmailService,Frontend container;
+```
 
 ## 📋 Stack Tecnológica
 
