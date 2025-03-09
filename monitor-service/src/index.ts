@@ -41,7 +41,7 @@ io.on('connection', async (socket) => {
     const pollingInterval = setInterval(async () => {
         const updatedQueues = await rabbitMQ.getQueues();
         socket.emit('queues', updatedQueues);
-    }, 5000);
+    }, 2000);
 
     socket.on('getQueueInfo', async (queueName: string) => {
         const queueInfo = await rabbitMQ.getQueueInfo(queueName);
