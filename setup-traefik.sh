@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Criar diretório para certificados e configurações
 mkdir -p ./traefik/certs
 mkdir -p ./traefik/config
