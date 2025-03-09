@@ -67,4 +67,4 @@ docker-compose.override.yml
 *.sublime-project
 .history/
 
-ambiente/
+traefik/

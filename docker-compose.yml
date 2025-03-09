@@ -2,12 +2,12 @@ version: '3.8'
 
 services:
   traefik:
-    image: traefik:v2.9
+    image: traefik:v2.10
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.file=true"
-      - "--providers.file.directory=/etc/traefik"
+      - "--providers.file.directory=/etc/traefik/config"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls=true"
@@ -18,9 +18,9 @@ services:
       - "443:443"
       - "8080:8080"
     volumes:
-      - ./ambiente/certs:/certs:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./ambiente/traefik_dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./traefik/certs:/etc/traefik/certs
+      - ./traefik/config:/etc/traefik/config
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - event-driven-net
     depends_on:
