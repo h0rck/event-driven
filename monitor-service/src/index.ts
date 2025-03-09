@@ -36,10 +36,11 @@ io.on('connection', async (socket) => {
     socket.emit('queues', queues);
 
 
+    // Que os deuses da programação me perdoem por esse setInterval em um socket 
     const pollingInterval = setInterval(async () => {
         const updatedQueues = await rabbitMQ.getQueues();
         socket.emit('queues', updatedQueues);
-    }, 1000);
+    }, 500);
 
     socket.on('getQueueInfo', async (queueName: string) => {
         const queueInfo = await rabbitMQ.getQueueInfo(queueName);
