@@ -17,8 +17,6 @@ const io = new Server(httpServer, {
     cors: {
         origin: [
             "https://monitor.dev.localhost",
-            "http://monitor.dev.localhost",
-            "http://localhost:5173"
         ],
         methods: ['GET', 'POST', 'OPTIONS'],
         credentials: true,

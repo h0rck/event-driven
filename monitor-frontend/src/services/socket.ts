@@ -18,9 +18,8 @@ export const connectSocket = () => {
     socket = io('https://monitor-service.dev.localhost', {
         transports: ['polling', 'websocket'],
         path: '/socket.io',
-        rejectUnauthorized: false,
+        rejectUnauthorized: false, // to nem ai 
         secure: true,
-        withCredentials: true
     });
 
     socket.on('connect', () => {
