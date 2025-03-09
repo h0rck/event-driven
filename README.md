@@ -15,10 +15,19 @@ Sistema de demonstração de arquitetura orientada a eventos utilizando tecnolog
 
 ## 🔧 Pré-requisitos
 
-- Docker (20.10+)
-- Docker Compose (2.0+)
+- Docker 
+- Docker Compose 
 - Navegador moderno com suporte a HTTPS
-- Porta 80, 443 e 8080 disponíveis
+- Portas disponíveis:
+  - 80: HTTP
+  - 443: HTTPS
+  - 8080: Traefik Dashboard
+  - 5672: RabbitMQ AMQP
+  - 15672: RabbitMQ Management
+  - 3000: Event Service
+  - 3001: Email Service
+  - 3002: Monitor Service
+  - 5173: Monitor Frontend (React)
 
 ## ⚙️ Instalação e Configuração
 
