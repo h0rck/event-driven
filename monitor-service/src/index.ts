@@ -15,14 +15,11 @@ const httpServer = createServer((req, res) => {
 
 const io = new Server(httpServer, {
     cors: {
-        origin: [
-            'https://monitor.dev.localhost',
-            'http://localhost:5173'
-        ],
+        origin: '*', // Apenas para testes, depois restrinja
         methods: ['GET', 'POST'],
         credentials: true
     },
-    transports: ['websocket'],
+    transports: ['polling', 'websocket'],
     path: '/socket.io'
 });
 
@@ -31,7 +28,6 @@ const rabbitMQ = new RabbitMQService();
 io.on('connection', async (socket) => {
     console.log('Client connected:', socket.id);
 
-    // Send initial queues list
     const queues = await rabbitMQ.getQueues();
     socket.emit('queues', queues);
 

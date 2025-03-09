@@ -3,8 +3,20 @@ import { io, Socket } from 'socket.io-client';
 let socket: Socket;
 
 export const connectSocket = () => {
-    socket = io('http://localhost:3002');
-    console.log('Connected to socket');
+    socket = io('http://monitor-service.dev.localhost', {
+        transports: ['polling', 'websocket'], // Permite fallback para polling (HTTP)
+        path: '/socket.io',
+        rejectUnauthorized: false
+    });
+
+
+    socket.on('connect', () => {
+        console.log('Connected to socket server');
+    });
+
+    socket.on('connect_error', (error) => {
+        console.error('Socket connection error:', error);
+    });
 };
 
 export const disconnectSocket = () => {
