@@ -9,7 +9,6 @@ Este projeto demonstra uma arquitetura orientada a eventos usando RabbitMQ como 
 - Git
 
 
-
 ## 🛠️ Configuração e Execução
 1. Clone o repositório:
 ```bash
