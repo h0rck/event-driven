@@ -1,32 +1,55 @@
-# Event-Driven Architecture Project
+# 🚀 Event-Driven Architecture Project
 
-Este projeto demonstra uma arquitetura orientada a eventos usando RabbitMQ como message broker, com serviços em Node.js e Traefik como reverse proxy.
+Sistema de demonstração de arquitetura orientada a eventos utilizando tecnologias modernas e boas práticas de desenvolvimento.
 
-## 🚀 Pré-requisitos
+## 📋 Stack Tecnológica
 
-- Docker
-- Docker Compose
-- Git
+- **Message Broker:** RabbitMQ
+- **Reverse Proxy:** Traefik (com HTTPS)
+- **Microsserviços:**
+  - **Event Service:** Node.js com Fastify
+  - **Email Service:** Node.js (Consumer RabbitMQ)
+  - **Monitor Service:** Node.js com Socket.IO 
+- **Frontend:** React.js
+- **Containers:** Docker & Docker Compose
 
+## 🔧 Pré-requisitos
 
-## 🛠️ Configuração e Execução
-1. Clone o repositório:
-```bash
-git clone <git@github.com:h0rck/Event-Driven-.git>
-cd Event-Driven
+- Docker (20.10+)
+- Docker Compose (2.0+)
+- Navegador moderno com suporte a HTTPS
+- Porta 80, 443 e 8080 disponíveis
 
-2. Dê permissão de execução ao script de setup:
-```bash
-chmod +x setup-traefik.sh
-```
+## ⚙️ Instalação e Configuração
 
-3. Execute o script de setup para gerar os certificados:
-```bash
-./setup-traefik.sh
-```
+1. **Clone o repositório:**
+   ```bash
+   git clone git@github.com:h0rck/event-driven.git
+   cd event-driven
+   ```
 
-4. Inicie os serviços:
-```bash
-docker-compose up -d
-```
+2. **Configure o ambiente:**
+   ```bash
+   chmod +x setup-traefik.sh
+   ./setup-traefik.sh
+   ```
+
+3. **Inicie os serviços:**
+   ```bash
+   docker-compose up -d
+   ```
+
+## 🌐 Acessando os Serviços
+
+- **Monitor Frontend:** https://monitor.dev.localhost
+- **RabbitMQ Dashboard:** https://rabbitmq.dev.localhost
+  - Usuario: guest
+  - Senha: guest
+- **Traefik Dashboard:** traefik.dev.localhost
+- **APIs:**
+  - Event Service: https://event-service.dev.localhost
+  - Email Service: https://email-service.dev.localhost
+  - Monitor Service: https://monitor-service.dev.localhost
+
+## 🏗️ Arquitetura do Sistema
 
