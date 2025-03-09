@@ -60,5 +60,9 @@ Sistema de demonstração de arquitetura orientada a eventos utilizando tecnolog
   - Email Service: https://email-service.dev.localhost
   - Monitor Service: https://monitor-service.dev.localhost
 
-## 🏗️ Arquitetura do Sistema
+## 📸 Screenshots
+
+### Monitor Frontend
+![Monitor Frontend](./assets/images/monitor-frontend.png)
+
 
