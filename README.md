@@ -24,7 +24,7 @@ Sistema de demonstração de arquitetura orientada a eventos utilizando tecnolog
 
 1. **Clone o repositório:**
    ```bash
-   git clone git@github.com:h0rck/event-driven.git
+   git clone https://github.com/h0rck/event-driven.git
    cd event-driven
    ```
 
