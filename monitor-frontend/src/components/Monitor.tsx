@@ -118,9 +118,9 @@ const Monitor: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
+        <div className="container mx-auto p-4 bg-gray-50 min-h-screen"> {/* p-6 -> p-4 */}
             {/* Header Principal */}
-            <header className="mb-8 bg-white p-6 rounded-lg shadow-lg border border-gray-100">
+            <header className="mb-4 bg-white p-4 rounded-lg shadow-lg border border-gray-100"> {/* mb-8 -> mb-4, p-6 -> p-4 */}
                 <div className="flex items-center justify-between mb-4">
                     <h1 className="text-3xl font-bold text-gray-800">Monitor de Eventos RabbitMQ</h1>
                     <div className="flex items-center gap-4">
@@ -155,7 +155,7 @@ const Monitor: React.FC = () => {
             </header>
 
             {/* Seção de Eventos de Teste */}
-            <section className="bg-white rounded-lg shadow-lg border border-gray-100 p-6 mb-8">
+            <section className="bg-white rounded-lg shadow-lg border border-gray-100 p-4 mb-4"> {/* p-6 -> p-4, mb-8 -> mb-4 */}
                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">Gerador de Eventos de Teste</h2>
                 <p className="text-gray-600 mb-6">
                     Use os botões abaixo para simular diferentes tipos de eventos no sistema.
@@ -205,7 +205,7 @@ const Monitor: React.FC = () => {
 
             {/* Monitor de Filas */}
             <section className="bg-white rounded-lg shadow-lg border border-gray-100">
-                <div className="p-6 border-b">
+                <div className="p-4 border-b"> {/* p-6 -> p-4 */}
                     <h2 className="text-2xl font-semibold text-gray-800">Monitor de Filas</h2>
                     <p className="text-gray-600 mb-4">
                         Visualização em tempo real do estado das filas no RabbitMQ
@@ -243,9 +243,9 @@ const Monitor: React.FC = () => {
                         <p className="text-gray-500">Nenhuma fila disponível no momento</p>
                     </div>
                 ) : (
-                    <div className="grid gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3"> {/* gap-6 -> gap-4, p-6 -> p-4 */}
                         {state.queues.map((queue) => (
-                            <div key={queue.name} className="bg-gray-50 rounded-lg p-6 border hover:border-blue-300 transition-colors">
+                            <div key={queue.name} className="bg-gray-50 rounded-lg p-4 border hover:border-blue-300 transition-colors"> {/* p-6 -> p-4 */}
                                 <h3 className="font-semibold text-xl mb-4 text-gray-800">{queue.name}</h3>
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center">

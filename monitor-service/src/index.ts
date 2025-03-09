@@ -37,10 +37,11 @@ io.on('connection', async (socket) => {
 
 
     // Que os deuses da programação me perdoem por esse setInterval em um socket 
+    // Coloquei 5000 porque é o tempo que o rabbitMQ atualiza as informações
     const pollingInterval = setInterval(async () => {
         const updatedQueues = await rabbitMQ.getQueues();
         socket.emit('queues', updatedQueues);
-    }, 500);
+    }, 5000);
 
     socket.on('getQueueInfo', async (queueName: string) => {
         const queueInfo = await rabbitMQ.getQueueInfo(queueName);
