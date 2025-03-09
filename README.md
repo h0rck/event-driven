@@ -10,7 +10,7 @@ Sistema de demonstração de arquitetura orientada a eventos utilizando tecnolog
   - **Event Service:** Node.js com Fastify
   - **Email Service:** Node.js (Consumer RabbitMQ)
   - **Monitor Service:** Node.js com Socket.IO 
-- **Frontend:** React.js
+- **Frontend:** React.js com Socket.IO 
 - **Containers:** Docker & Docker Compose
 
 ## 🔧 Pré-requisitos
