@@ -175,6 +175,19 @@ const Monitor: React.FC = () => {
                         </button>
                     </div>
 
+                    <div className="p-4 border rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors">
+                        <h3 className="font-semibold text-lg mb-2 text-orange-800">Evento de Inventário</h3>
+                        <p className="text-orange-600 text-sm mb-4">
+                            Simula uma atualização no inventário do sistema
+                        </p>
+                        <button
+                            onClick={() => triggerTestEvent('inventory')}
+                            className="w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                        >
+                            Disparar Evento de Inventário
+                        </button>
+                    </div>
+
                     <div className="p-4 border rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
                         <h3 className="font-semibold text-lg mb-2 text-green-800">Evento de Pagamento</h3>
                         <p className="text-green-600 text-sm mb-4">
@@ -188,18 +201,7 @@ const Monitor: React.FC = () => {
                         </button>
                     </div>
 
-                    <div className="p-4 border rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors">
-                        <h3 className="font-semibold text-lg mb-2 text-orange-800">Evento de Inventário</h3>
-                        <p className="text-orange-600 text-sm mb-4">
-                            Simula uma atualização no inventário do sistema
-                        </p>
-                        <button
-                            onClick={() => triggerTestEvent('inventory')}
-                            className="w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-                        >
-                            Disparar Evento de Inventário
-                        </button>
-                    </div>
+
                 </div>
             </section>
 
