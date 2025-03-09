@@ -1,4 +1,4 @@
-# 🚀 Eent Diven Achitecture
+# 🚀 Evnt Diven Achitecture
 
 ### Monitor Frontend
 ![Monitor Frontend](./assets/images/monitor-frontend.png)
