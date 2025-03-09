@@ -1,6 +1,8 @@
-# 🚀 Event-Driven Architecture Project
+# 🚀 Eent Diven Achitecture
 
-Sistema de demonstração de arquitetura orientada a eventos utilizando tecnologias modernas e boas práticas de desenvolvimento.
+### Monitor Frontend
+![Monitor Frontend](./assets/images/monitor-frontend.png)
+
 
 ## 📋 Stack Tecnológica
 
@@ -59,10 +61,5 @@ Sistema de demonstração de arquitetura orientada a eventos utilizando tecnolog
   - Event Service: https://event-service.dev.localhost
   - Email Service: https://email-service.dev.localhost
   - Monitor Service: https://monitor-service.dev.localhost
-
-## 📸 Screenshots
-
-### Monitor Frontend
-![Monitor Frontend](./assets/images/monitor-frontend.png)
 
 
