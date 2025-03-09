@@ -3,53 +3,6 @@
 ### Monitor Frontend
 ![Monitor Frontend](./assets/images/monitor-frontend.png)
 
-### 📊 Diagrama da Arquitetura
-```mermaid
-flowchart TB
-    subgraph Client Layer
-        Browser([Browser])
-    end
-
-    subgraph Gateway Layer
-        Traefik[Traefik Proxy]
-    end
-
-    subgraph Frontend Layer
-        Frontend[React App]
-    end
-
-    subgraph Services Layer
-        EventService[Event Service]
-        MonitorService[Monitor Service]
-        EmailService[Email Service]
-    end
-
-    subgraph Message Layer
-        RabbitMQ[(RabbitMQ)]
-    end
-
-    %% Connections
-    Browser --> |HTTPS| Traefik
-    Traefik --> |/| Frontend
-    Traefik --> |/api/events| EventService
-    Traefik --> |/socket.io| MonitorService
-    Frontend --> |WebSocket| MonitorService
-    EventService --> |Publish| RabbitMQ
-    MonitorService --> |Subscribe| RabbitMQ
-    EmailService --> |Consume| RabbitMQ
-
-    %% Styling
-    classDef client fill:#d4edda,stroke:#155724
-    classDef gateway fill:#cce5ff,stroke:#004085
-    classDef service fill:#fff3cd,stroke:#856404
-    classDef broker fill:#f8d7da,stroke:#721c24
-    
-    class Browser client
-    class Traefik gateway
-    class EventService,MonitorService,EmailService service
-    class RabbitMQ broker
-```
-
 ## 📋 Stack Tecnológica
 
 - **Message Broker:** RabbitMQ
