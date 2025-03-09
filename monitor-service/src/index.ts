@@ -33,8 +33,15 @@ const rabbitMQ = new RabbitMQService();
 io.on('connection', async (socket) => {
     console.log('Client connected:', socket.id);
 
+
     const queues = await rabbitMQ.getQueues();
     socket.emit('queues', queues);
+
+
+    const pollingInterval = setInterval(async () => {
+        const updatedQueues = await rabbitMQ.getQueues();
+        socket.emit('queues', updatedQueues);
+    }, 1000);
 
     socket.on('getQueueInfo', async (queueName: string) => {
         const queueInfo = await rabbitMQ.getQueueInfo(queueName);
@@ -49,6 +56,7 @@ io.on('connection', async (socket) => {
 
     socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
+        clearInterval(pollingInterval); // Clean up the interval when client disconnects
     });
 });
 
