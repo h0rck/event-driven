@@ -57,33 +57,6 @@ services:
       - "traefik.http.routers.rabbitmq.tls=true"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
-  event-service:
-    build:
-      context: ./event-service
-      dockerfile: Dockerfile
-    environment:
-      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
-      NODE_ENV: development
-    volumes:
-      - type: bind
-        source: ./event-service
-        target: /usr/src/app
-      - type: volume
-        source: user_node_modules
-        target: /usr/src/app/node_modules
-    networks:
-      - event-driven-net
-    restart: always
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.event-service.rule=Host(`event-service.dev.localhost`)"
-      - "traefik.http.routers.event-service.entrypoints=websecure"
-      - "traefik.http.routers.event-service.tls=true"
-      - "traefik.http.services.event-service.loadbalancer.server.port=3000"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
   email-service:
     build:
       context: ./email-service
@@ -165,6 +138,56 @@ services:
       - "traefik.http.services.monitor-frontend.loadbalancer.server.port=5173"
     depends_on:
       - monitor-service
+
+  event-v2-service:
+    build:
+      context: ./event-v2-service
+      dockerfile: Dockerfile
+    container_name: event-v2-service
+    volumes:
+      - ./event-v2-service:/app
+    environment:
+      - PORT=3003
+      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672/
+    networks:
+      - event-driven-net
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.event-v2.rule=Host(`event-v2-service.dev.localhost`)"
+      - "traefik.http.routers.event-v2.entrypoints=websecure"
+      - "traefik.http.routers.event-v2.tls=true"
+      - "traefik.http.services.event-v2.loadbalancer.server.port=3003"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  event-service:
+    build:
+      context: ./event-service
+      dockerfile: Dockerfile
+    environment:
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
+      NODE_ENV: development
+    volumes:
+      - type: bind
+        source: ./event-service
+        target: /usr/src/app
+      - type: volume
+        source: user_node_modules
+        target: /usr/src/app/node_modules
+    networks:
+      - event-driven-net
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.event-service.rule=Host(`event-service.dev.localhost`)"
+      - "traefik.http.routers.event-service.entrypoints=websecure"
+      - "traefik.http.routers.event-service.tls=true"
+      - "traefik.http.services.event-service.loadbalancer.server.port=3000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
 volumes:
   rabbitmq_data:

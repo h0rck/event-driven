@@ -9,6 +9,7 @@
 - **Reverse Proxy:** Traefik (com HTTPS)
 - **Microsserviços:**
   - **Event Service:** Node.js com Fastify
+  - **Event Service V2:** Go com Gin
   - **Email Service:** Node.js (Consumer RabbitMQ)
   - **Monitor Service:** Node.js com Socket.IO 
 - **Frontend:** React.js com Socket.IO 
@@ -28,6 +29,7 @@
   - 3000: Event Service
   - 3001: Email Service
   - 3002: Monitor Service
+  - 3003: Event Service V2 (Go)
   - 5173: Monitor Frontend (React)
 
 ## ⚙️ Instalação e Configuração
