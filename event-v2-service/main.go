@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -16,8 +17,9 @@ import (
 // @title Event V2 Service API
 // @version 2.0.0
 // @description This is a sample event service API
-// @host localhost:3003
+// @host event-v2-service.dev.localhost
 // @BasePath /api/v2
+// @schemes http https
 
 type Response struct {
 	Message string `json:"message"`
@@ -35,6 +37,15 @@ func main() {
 
 	// Cria router do Gin
 	r := gin.Default()
+
+	// Configura CORS para permitir todas as origens
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	// Configura porta
 	port := os.Getenv("PORT")

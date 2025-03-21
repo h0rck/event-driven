@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"time"
 
 	"github.com/streadway/amqp"
 )
@@ -17,28 +19,34 @@ type RabbitMQ struct {
 // Instância global do RabbitMQ
 var Instance *RabbitMQ
 
-// Configuração das exchanges e filas
-var configs = []struct {
-	Exchange string
-	Queue    string
-}{
-	{Exchange: "events.email", Queue: "email_queue"},
-	{Exchange: "events.payment", Queue: "payment_queue"},
-	{Exchange: "events.inventory", Queue: "inventory_queue"},
-}
-
 // Init conecta ao RabbitMQ e configura as exchanges e filas
 func Init() (*RabbitMQ, error) {
-	// Conecta ao RabbitMQ
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	if err != nil {
-		return nil, fmt.Errorf("erro ao conectar ao RabbitMQ: %v", err)
+	// Get RabbitMQ URI from environment
+	rabbitURI := os.Getenv("RABBITMQ_URI")
+	if rabbitURI == "" {
+		rabbitURI = "amqp://guest:guest@rabbitmq:5672/"
 	}
 
-	// Cria um canal
+	// Try to connect with retry
+	var conn *amqp.Connection
+	var err error
+
+	for i := 0; i < 5; i++ {
+		conn, err = amqp.Dial(rabbitURI)
+		if err == nil {
+			break
+		}
+		log.Printf("Failed to connect to RabbitMQ, retrying in 5 seconds...")
+		time.Sleep(5 * time.Second)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to RabbitMQ after 5 attempts: %v", err)
+	}
+
 	ch, err := conn.Channel()
 	if err != nil {
-		return nil, fmt.Errorf("erro ao criar canal: %v", err)
+		return nil, fmt.Errorf("failed to open channel: %v", err)
 	}
 
 	rabbit := &RabbitMQ{
@@ -46,51 +54,31 @@ func Init() (*RabbitMQ, error) {
 		channel:    ch,
 	}
 
-	// Configura exchanges e filas
-	for _, config := range configs {
-		// Cria exchange
-		err = ch.ExchangeDeclare(
-			config.Exchange, // nome
-			"topic",         // tipo
-			true,            // durável
-			false,           // auto-delete
-			false,           // internal
-			false,           // no-wait
-			nil,             // arguments
-		)
-		if err != nil {
-			return nil, fmt.Errorf("erro ao criar exchange %s: %v", config.Exchange, err)
-		}
-
-		// Cria fila
-		_, err = ch.QueueDeclare(
-			config.Queue, // nome
-			true,         // durável
-			false,        // auto-delete
-			false,        // exclusive
-			false,        // no-wait
-			nil,          // arguments
-		)
-		if err != nil {
-			return nil, fmt.Errorf("erro ao criar fila %s: %v", config.Queue, err)
-		}
-
-		// Liga exchange com fila
-		err = ch.QueueBind(
-			config.Queue,    // fila
-			"#",             // routing key
-			config.Exchange, // exchange
-			false,           // no-wait
-			nil,             // arguments
-		)
-		if err != nil {
-			return nil, fmt.Errorf("erro ao ligar exchange com fila: %v", err)
-		}
-
-		log.Printf("Configurado: %s -> %s", config.Exchange, config.Queue)
+	// Configure exchanges and queues
+	exchanges := []struct {
+		name string
+		kind string
+	}{
+		{name: "events.email", kind: "topic"},
+		{name: "events.payment", kind: "topic"},
+		{name: "events.inventory", kind: "topic"},
 	}
 
-	log.Println("RabbitMQ conectado e configurado com sucesso!")
+	for _, ex := range exchanges {
+		err = ch.ExchangeDeclare(
+			ex.name, // name
+			ex.kind, // kind
+			true,    // durable
+			false,   // auto-deleted
+			false,   // internal
+			false,   // no-wait
+			nil,     // arguments
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to declare exchange %s: %v", ex.name, err)
+		}
+		log.Printf("Declared exchange: %s", ex.name)
+	}
 
 	Instance = rabbit
 	return rabbit, nil
