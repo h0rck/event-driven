@@ -1,39 +1,12 @@
 basePath: /api/v2
 definitions:
-  main.Response:
+  handlers.Response:
     properties:
       message:
         type: string
       service:
         type: string
       version:
-        type: string
-    type: object
-  models.EmailEvent:
-    properties:
-      body:
-        type: string
-      from:
-        type: string
-      send_at:
-        type: string
-      subject:
-        type: string
-      to:
-        type: string
-    type: object
-  models.InventoryEvent:
-    properties:
-      operation:
-        description: '"add" ou "remove"'
-        type: string
-      product_id:
-        type: string
-      quantity:
-        type: integer
-      updated_at:
-        type: string
-      warehouse_id:
         type: string
     type: object
   models.PaymentEvent:
@@ -60,16 +33,7 @@ info:
 paths:
   /api/v2/events/email:
     post:
-      consumes:
-      - application/json
-      description: Process email event
-      parameters:
-      - description: Email Event
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/models.EmailEvent'
+      description: Sends a random email event to RabbitMQ
       produces:
       - application/json
       responses:
@@ -79,27 +43,18 @@ paths:
             additionalProperties:
               type: string
             type: object
-        "400":
-          description: Bad request
+        "500":
+          description: Server error
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Process email event
+      summary: Send random email event
       tags:
       - events
   /api/v2/events/inventory:
     post:
-      consumes:
-      - application/json
-      description: Process inventory event
-      parameters:
-      - description: Inventory Event
-        in: body
-        name: event
-        required: true
-        schema:
-          $ref: '#/definitions/models.InventoryEvent'
+      description: Sends a random inventory event to RabbitMQ
       produces:
       - application/json
       responses:
@@ -109,13 +64,13 @@ paths:
             additionalProperties:
               type: string
             type: object
-        "400":
-          description: Bad request
+        "500":
+          description: Server error
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Process inventory event
+      summary: Send random inventory event
       tags:
       - events
   /api/v2/events/payment:
@@ -157,7 +112,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Response'
+            $ref: '#/definitions/handlers.Response'
       summary: Health check endpoint
       tags:
       - health

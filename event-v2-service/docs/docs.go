@@ -17,28 +17,14 @@ const docTemplate = `{
     "paths": {
         "/api/v2/events/email": {
             "post": {
-                "description": "Process email event",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Sends a random email event to RabbitMQ",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "events"
                 ],
-                "summary": "Process email event",
-                "parameters": [
-                    {
-                        "description": "Email Event",
-                        "name": "event",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.EmailEvent"
-                        }
-                    }
-                ],
+                "summary": "Send random email event",
                 "responses": {
                     "202": {
                         "description": "Success response",
@@ -49,8 +35,8 @@ const docTemplate = `{
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad request",
+                    "500": {
+                        "description": "Server error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -63,28 +49,14 @@ const docTemplate = `{
         },
         "/api/v2/events/inventory": {
             "post": {
-                "description": "Process inventory event",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Sends a random inventory event to RabbitMQ",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "events"
                 ],
-                "summary": "Process inventory event",
-                "parameters": [
-                    {
-                        "description": "Inventory Event",
-                        "name": "event",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.InventoryEvent"
-                        }
-                    }
-                ],
+                "summary": "Send random inventory event",
                 "responses": {
                     "202": {
                         "description": "Success response",
@@ -95,8 +67,8 @@ const docTemplate = `{
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad request",
+                    "500": {
+                        "description": "Server error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -167,7 +139,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.Response"
+                            "$ref": "#/definitions/handlers.Response"
                         }
                     }
                 }
@@ -175,7 +147,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "main.Response": {
+        "handlers.Response": {
             "type": "object",
             "properties": {
                 "message": {
@@ -185,47 +157,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.EmailEvent": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "from": {
-                    "type": "string"
-                },
-                "send_at": {
-                    "type": "string"
-                },
-                "subject": {
-                    "type": "string"
-                },
-                "to": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.InventoryEvent": {
-            "type": "object",
-            "properties": {
-                "operation": {
-                    "description": "\"add\" ou \"remove\"",
-                    "type": "string"
-                },
-                "product_id": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "warehouse_id": {
                     "type": "string"
                 }
             }
