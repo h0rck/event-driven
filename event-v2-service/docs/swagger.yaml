@@ -1,0 +1,164 @@
+basePath: /api/v2
+definitions:
+  main.Response:
+    properties:
+      message:
+        type: string
+      service:
+        type: string
+      version:
+        type: string
+    type: object
+  models.EmailEvent:
+    properties:
+      body:
+        type: string
+      from:
+        type: string
+      send_at:
+        type: string
+      subject:
+        type: string
+      to:
+        type: string
+    type: object
+  models.InventoryEvent:
+    properties:
+      operation:
+        description: '"add" ou "remove"'
+        type: string
+      product_id:
+        type: string
+      quantity:
+        type: integer
+      updated_at:
+        type: string
+      warehouse_id:
+        type: string
+    type: object
+  models.PaymentEvent:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      currency:
+        type: string
+      customer_id:
+        type: string
+      order_id:
+        type: string
+      payment_type:
+        type: string
+    type: object
+host: localhost:3003
+info:
+  contact: {}
+  description: This is a sample event service API
+  title: Event V2 Service API
+  version: 2.0.0
+paths:
+  /api/v2/events/email:
+    post:
+      consumes:
+      - application/json
+      description: Process email event
+      parameters:
+      - description: Email Event
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.EmailEvent'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Success response
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Process email event
+      tags:
+      - events
+  /api/v2/events/inventory:
+    post:
+      consumes:
+      - application/json
+      description: Process inventory event
+      parameters:
+      - description: Inventory Event
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.InventoryEvent'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Success response
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Process inventory event
+      tags:
+      - events
+  /api/v2/events/payment:
+    post:
+      consumes:
+      - application/json
+      description: Process payment event
+      parameters:
+      - description: Payment Event
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.PaymentEvent'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Success response
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Process payment event
+      tags:
+      - events
+  /api/v2/health:
+    get:
+      description: Get service health status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Response'
+      summary: Health check endpoint
+      tags:
+      - health
+swagger: "2.0"

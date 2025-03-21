@@ -1,11 +1,22 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
-	"net/http"
 	"os"
+
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "github.com/h0rck/event-driven/event-v2-service/docs"
+	"github.com/h0rck/event-driven/event-v2-service/handlers"
 )
+
+// @title Event V2 Service API
+// @version 2.0.0
+// @description This is a sample event service API
+// @host localhost:3003
+// @BasePath /api/v2
 
 type Response struct {
 	Message string `json:"message"`
@@ -14,55 +25,34 @@ type Response struct {
 }
 
 func main() {
+	// Cria router do Gin
+	r := gin.Default()
+
+	// Configura porta
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3003"
 	}
 
-	// Register route handlers
-	http.HandleFunc("/health", healthHandler)
-	http.HandleFunc("/api/v2/events/email", eventHandler("email"))
-	http.HandleFunc("/api/v2/events/payment", eventHandler("payment"))
-	http.HandleFunc("/api/v2/events/inventory", eventHandler("inventory"))
+	// Grupo de rotas v2
+	v2 := r.Group("/api/v2")
+	{
+		// Rota de health check
+		v2.GET("/health", handlers.HealthHandler)
 
-	log.Printf("Starting Event V2 Service on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatalf("Could not start server: %s", err.Error())
-	}
-}
-
-func healthHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	response := Response{
-		Message: "OK",
-		Service: "event-v2-service",
-		Version: "2.0.0",
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
-}
-
-// Factory function to create event handlers
-func eventHandler(eventType string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
+		// Rotas de eventos
+		events := v2.Group("/events")
+		{
+			events.POST("/email", handlers.EmailHandler)
+			events.POST("/payment", handlers.PaymentHandler)
+			events.POST("/inventory", handlers.InventoryHandler)
 		}
-
-		log.Printf("%s event received", eventType)
-		// TODO: Add RabbitMQ publishing logic
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(map[string]string{
-			"status": eventType + " event received",
-		})
 	}
+
+	// Rota do Swagger
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Inicia o servidor
+	log.Printf("Server starting on port %s", port)
+	r.Run(":" + port)
 }
