@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/h0rck/event-driven/event-v2-service/docs"
 	"github.com/h0rck/event-driven/event-v2-service/handlers"
+	"github.com/h0rck/event-driven/event-v2-service/rabbitmq"
 )
 
 // @title Event V2 Service API
@@ -25,6 +26,13 @@ type Response struct {
 }
 
 func main() {
+	// Inicializa RabbitMQ
+	_, err := rabbitmq.Init()
+	if err != nil {
+		log.Fatalf("Falha ao inicializar RabbitMQ: %v", err)
+	}
+	defer rabbitmq.Instance.Close()
+
 	// Cria router do Gin
 	r := gin.Default()
 

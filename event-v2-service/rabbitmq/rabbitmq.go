@@ -1,56 +1,135 @@
 package rabbitmq
 
-import "github.com/streadway/amqp"
+import (
+	"encoding/json"
+	"fmt"
+	"log"
 
-var channel *amqp.Channel
-var connection *amqp.Connection
+	"github.com/streadway/amqp"
+)
 
-func Init() error {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	if err != nil {
-		return err
-	}
-
-	ch, err := conn.Channel()
-	if err != nil {
-		return err
-	}
-
-	// Declara a fila de email
-	_, err = ch.QueueDeclare(
-		"email_queue", // name
-		true,          // durable
-		false,         // delete when unused
-		false,         // exclusive
-		false,         // no-wait
-		nil,           // arguments
-	)
-	if err != nil {
-		return err
-	}
-
-	channel = ch
-	connection = conn
-	return nil
+// RabbitMQ guarda a conexão e o canal
+type RabbitMQ struct {
+	connection *amqp.Connection
+	channel    *amqp.Channel
 }
 
-func PublishMessage(queue string, body []byte) error {
-	return channel.Publish(
-		"",    // exchange
-		queue, // routing key
-		false, // mandatory
-		false, // immediate
+// Instância global do RabbitMQ
+var Instance *RabbitMQ
+
+// Configuração das exchanges e filas
+var configs = []struct {
+	Exchange string
+	Queue    string
+}{
+	{Exchange: "events.email", Queue: "email_queue"},
+	{Exchange: "events.payment", Queue: "payment_queue"},
+	{Exchange: "events.inventory", Queue: "inventory_queue"},
+}
+
+// Init conecta ao RabbitMQ e configura as exchanges e filas
+func Init() (*RabbitMQ, error) {
+	// Conecta ao RabbitMQ
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		return nil, fmt.Errorf("erro ao conectar ao RabbitMQ: %v", err)
+	}
+
+	// Cria um canal
+	ch, err := conn.Channel()
+	if err != nil {
+		return nil, fmt.Errorf("erro ao criar canal: %v", err)
+	}
+
+	rabbit := &RabbitMQ{
+		connection: conn,
+		channel:    ch,
+	}
+
+	// Configura exchanges e filas
+	for _, config := range configs {
+		// Cria exchange
+		err = ch.ExchangeDeclare(
+			config.Exchange, // nome
+			"topic",         // tipo
+			true,            // durável
+			false,           // auto-delete
+			false,           // internal
+			false,           // no-wait
+			nil,             // arguments
+		)
+		if err != nil {
+			return nil, fmt.Errorf("erro ao criar exchange %s: %v", config.Exchange, err)
+		}
+
+		// Cria fila
+		_, err = ch.QueueDeclare(
+			config.Queue, // nome
+			true,         // durável
+			false,        // auto-delete
+			false,        // exclusive
+			false,        // no-wait
+			nil,          // arguments
+		)
+		if err != nil {
+			return nil, fmt.Errorf("erro ao criar fila %s: %v", config.Queue, err)
+		}
+
+		// Liga exchange com fila
+		err = ch.QueueBind(
+			config.Queue,    // fila
+			"#",             // routing key
+			config.Exchange, // exchange
+			false,           // no-wait
+			nil,             // arguments
+		)
+		if err != nil {
+			return nil, fmt.Errorf("erro ao ligar exchange com fila: %v", err)
+		}
+
+		log.Printf("Configurado: %s -> %s", config.Exchange, config.Queue)
+	}
+
+	log.Println("RabbitMQ conectado e configurado com sucesso!")
+
+	Instance = rabbit
+	return rabbit, nil
+}
+
+// PublishMessage publica uma mensagem em uma exchange
+func (r *RabbitMQ) PublishMessage(exchange string, message interface{}) error {
+	// Converte mensagem para JSON
+	body, err := json.Marshal(message)
+	if err != nil {
+		return fmt.Errorf("erro ao converter mensagem para JSON: %v", err)
+	}
+
+	// Publica a mensagem
+	err = r.channel.Publish(
+		exchange, // exchange
+		"",       // routing key
+		false,    // mandatory
+		false,    // immediate
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        body,
-		})
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("erro ao publicar mensagem: %v", err)
+	}
+
+	log.Printf("Mensagem enviada para %s", exchange)
+	return nil
 }
 
-func Close() {
-	if channel != nil {
-		channel.Close()
+// Close fecha a conexão com o RabbitMQ
+func (r *RabbitMQ) Close() {
+	if r.channel != nil {
+		r.channel.Close()
 	}
-	if connection != nil {
-		connection.Close()
+	if r.connection != nil {
+		r.connection.Close()
 	}
+	log.Println("Conexão com RabbitMQ fechada")
 }

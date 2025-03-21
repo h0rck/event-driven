@@ -46,7 +46,7 @@ func InventoryHandler(c *gin.Context) {
 	}
 
 	// Enviar para o RabbitMQ
-	err = rabbitmq.PublishMessage("inventory_queue", inventoryJSON)
+	err = rabbitmq.Instance.PublishMessage("inventory_queue", inventoryJSON)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send inventory event to queue"})
 		return

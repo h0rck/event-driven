@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -26,32 +24,23 @@ type EmailEvent struct {
 // @Failure 500 {object} map[string]string "Server error"
 // @Router /api/v2/events/email [post]
 func EmailHandler(c *gin.Context) {
-	// Criar email aleatório
 	email := EmailEvent{
 		To:      "user@example.com",
 		From:    "system@example.com",
 		Subject: "Test Email",
-		Body:    "This is a test email sent at " + time.Now().String(),
+		Body:    "This is a test email",
 		SendAt:  time.Now(),
 	}
 
-	// Converter para JSON
-	emailJSON, err := json.Marshal(email)
+	// Envia para o RabbitMQ
+	err := rabbitmq.Instance.PublishMessage("events.email", email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create email"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send email"})
 		return
 	}
 
-	// Enviar para o RabbitMQ
-	err = rabbitmq.PublishMessage("email_queue", emailJSON)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send email to queue"})
-		return
-	}
-
-	log.Printf("Random email sent to queue: To=%s, Subject=%s", email.To, email.Subject)
 	c.JSON(http.StatusAccepted, gin.H{
-		"status": "email event sent to queue successfully",
+		"status": "email sent to queue",
 		"email":  email,
 	})
 }
