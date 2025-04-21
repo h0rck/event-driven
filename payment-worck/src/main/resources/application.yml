@@ -1,0 +1,14 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: payment-service
+  
+  rabbitmq:
+    addresses: amqp://guest:guest@rabbitmq:5672
+
+logging:
+  level:
+    org.springframework: INFO
+    com.payment.service: DEBUG
