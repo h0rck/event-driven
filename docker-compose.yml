@@ -85,6 +85,29 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  payments-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    environment:
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
+      NODE_ENV: development
+      PORT: 8081
+    volumes:
+      - ./payment-service:/app
+    networks:
+      - event-driven-net
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.payments-service.rule=Host(`payments-service.dev.localhost`)"
+      - "traefik.http.routers.payments-service.entrypoints=websecure"
+      - "traefik.http.routers.payments-service.tls=true"
+      - "traefik.http.services.payments-service.loadbalancer.server.port=8081"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   monitor-service:
     build:
       context: ./monitor-service

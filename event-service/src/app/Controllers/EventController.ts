@@ -132,7 +132,7 @@ export class EventController {
             const paymentEvent = {
                 id: randomUUID(),
                 timestamp: new Date(),
-                type: 'payment.processed',
+                type: 'payment.process',
                 data: {
                     transactionId: randomUUID(),
                     amount: Number((Math.random() * 1000).toFixed(2)),
@@ -142,7 +142,7 @@ export class EventController {
                 }
             };
 
-            await this.messageBroker.publishMessage('events.payments', 'payment.processed', paymentEvent);
+            await this.messageBroker.publishMessage('events.payments', 'payment.process', paymentEvent);
             await this.messageBroker.closeConnection();
 
             return reply.status(200).send({
