@@ -1,10 +1,10 @@
-package dev.worck;
+package dev.worker;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class WorckApplicationTests {
+class WorkerApplicationTests {
 
 	@Test
 	void contextLoads() {

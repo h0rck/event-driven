@@ -136,6 +136,29 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  payment-worker:
+    build:
+      context: ./payment-worker
+      dockerfile: Dockerfile
+    environment:
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
+      NODE_ENV: development
+      PORT: 8082
+    volumes:
+      - ./payment-worker:/app
+    networks:
+      - event-driven-net
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.payment-worker.rule=Host(`payment-worker.dev.localhost`)"
+      - "traefik.http.routers.payment-worker.entrypoints=websecure"
+      - "traefik.http.routers.payment-worker.tls=true"
+      - "traefik.http.services.payment-worker.loadbalancer.server.port=8082"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   monitor-frontend:
     build:
       context: ./monitor-frontend
