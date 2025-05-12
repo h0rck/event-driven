@@ -12,7 +12,7 @@ public class PaymentFacade {
     @Autowired
     private PaymentRequestProducer producer;
 
-    public String processPayment(PaymentDTO paymentDTO) {
+    public String process(PaymentDTO paymentDTO) {
         try {
             producer.sendPaymentRequest(paymentDTO);
         } catch (Exception e) {
