@@ -1,0 +1,50 @@
+{
+    "queues": [
+        {
+            "name": "payment-request",
+            "durable": true
+        },
+        {
+            "name": "payment-response-success",
+            "durable": true
+        },
+        {
+            "name": "payment-response-error",
+            "durable": true
+        }
+    ],
+    "exchanges": [
+        {
+            "name": "payment-request-exchange",
+            "type": "direct",
+            "durable": true
+        },
+        {
+            "name": "payment-response-success-exchange",
+            "type": "direct",
+            "durable": true
+        },
+        {
+            "name": "payment-response-error-exchange",
+            "type": "direct",
+            "durable": true
+        }
+    ],
+    "bindings": [
+        {
+            "source": "payment-request-exchange",
+            "destination": "payment-request",
+            "routing_key": "payment-request-key"
+        },
+        {
+            "source": "payment-response-success-exchange",
+            "destination": "payment-response-success",
+            "routing_key": "payment-response-success-key"
+        },
+        {
+            "source": "payment-response-error-exchange",
+            "destination": "payment-response-error",
+            "routing_key": "payment-response-error-key"
+        }
+    ]
+}
