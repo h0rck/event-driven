@@ -14,10 +14,15 @@ import dev.payment_worker.producer.PaymentSuccessProducer;
 @Component
 public class PaymentRequestConsumer {
 
-    @Autowired
     private PaymentSuccessProducer paymentSuccessProducer;
-    @Autowired
     private PaymentErrorProducer paymentErrorProducer;
+
+    public PaymentRequestConsumer(
+            PaymentSuccessProducer paymentSuccessProducer,
+            PaymentErrorProducer paymentErrorProducer) {
+        this.paymentSuccessProducer = paymentSuccessProducer;
+        this.paymentErrorProducer = paymentErrorProducer;
+    }
 
     @RabbitListener(queues = { "payment-request" })
     public void consumePaymentRequest(@Payload Message<String> message) {
