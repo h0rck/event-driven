@@ -1,38 +1,6 @@
 version: '3.8'
 
 services:
-  traefik:
-    image: traefik:v2.10
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.file=true"
-      - "--providers.file.directory=/etc/traefik/config"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.websecure.http.tls=true"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-    ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080"
-    volumes:
-      - ./traefik/certs:/etc/traefik/certs
-      - ./traefik/config:/etc/traefik/config
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - event-driven-net
-    depends_on:
-      - event-service
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.dev.localhost`)"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.tls=true"
-      - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
-
   rabbitmq:
     image: rabbitmq:management
     ports:
@@ -85,29 +53,6 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  payments-service:
-    build:
-      context: ./payment-service
-      dockerfile: Dockerfile
-    environment:
-      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
-      NODE_ENV: development
-      PORT: 8081
-    volumes:
-      - ./payment-service:/app
-    networks:
-      - event-driven-net
-    restart: always
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.payments-service.rule=Host(`payments-service.dev.localhost`)"
-      - "traefik.http.routers.payments-service.entrypoints=websecure"
-      - "traefik.http.routers.payments-service.tls=true"
-      - "traefik.http.services.payments-service.loadbalancer.server.port=8081"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
   monitor-service:
     build:
       context: ./monitor-service
@@ -132,9 +77,6 @@ services:
       - "traefik.http.routers.monitor-service.entrypoints=websecure"
       - "traefik.http.routers.monitor-service.tls=true"
       - "traefik.http.services.monitor-service.loadbalancer.server.port=3002"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
 
   payment-worker:
     build:
@@ -245,4 +187,5 @@ volumes:
 
 networks:
   event-driven-net:
-    driver: bridge
+    external: true
+    name: event-driven-net

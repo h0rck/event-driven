@@ -66,5 +66,3 @@ docker-compose.override.yml
 *.sublime-workspace
 *.sublime-project
 .history/
-
-traefik/

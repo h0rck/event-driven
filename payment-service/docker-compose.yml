@@ -1,0 +1,25 @@
+networks:
+  event-driven-net:
+    external: true
+    name: event-driven-net
+
+services:
+  payments-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
+      NODE_ENV: development
+      PORT: 8081
+    volumes:
+      - .:/app
+    networks:
+      - event-driven-net
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.payments-service.rule=Host(`payments-service.dev.localhost`)"
+      - "traefik.http.routers.payments-service.entrypoints=websecure"
+      - "traefik.http.routers.payments-service.tls=true"
+      - "traefik.http.services.payments-service.loadbalancer.server.port=8081"

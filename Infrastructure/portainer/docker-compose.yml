@@ -1,0 +1,29 @@
+networks:
+  event-driven-net:
+    external: true
+    name: event-driven-net
+
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "9443:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.dev.localhost`)"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+    networks:
+      - event-driven-net
+
+volumes:
+  portainer_data:
+    driver: local
+    name: portainer_data
+
+# 123456789012

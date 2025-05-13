@@ -1,5 +1,9 @@
 export const customFetch = async (endpoint: string, options: RequestInit = {}) => {
-    const url = `https://event-service.dev.localhost/api/v1/${endpoint}`;
+    let url = `https://event-service.dev.localhost/api/v1/${endpoint}`;
+
+    if (endpoint === 'events/payment') {
+        url = "https://payments-service.dev.localhost/api/v1/payment"
+    }
 
     const response = await fetch(url, {
         method: 'POST',
@@ -19,3 +23,4 @@ export const customFetch = async (endpoint: string, options: RequestInit = {}) =
 
     return response.json();
 };
+
