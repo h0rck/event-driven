@@ -57,10 +57,8 @@
 - **RabbitMQ Dashboard:** https://rabbitmq.dev.localhost
   - Usuario: guest
   - Senha: guest
-- **Traefik Dashboard:** traefik.dev.localhost
+- **Traefik Dashboard:** https://traefik.dev.localhost
 - **APIs:**
   - Event Service: https://event-service.dev.localhost
   - Email Service: https://email-service.dev.localhost
   - Monitor Service: https://monitor-service.dev.localhost
-
-
